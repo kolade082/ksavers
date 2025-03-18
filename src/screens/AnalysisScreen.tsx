@@ -133,23 +133,60 @@ export default function AnalysisScreen() {
     );
   }
 
-  // Prepare data for pie chart
+  // Process data for pie chart
   const pieChartData = analysis.categories.map((category, index) => ({
     name: category.name,
-    spending: category.amount,
+    spending: Math.abs(category.amount),
     color: CHART_COLORS[index % CHART_COLORS.length],
     legendFontColor: '#7F7F7F',
     legendFontSize: 12,
+    legendFontWeight: 'bold',
   }));
 
-  // Prepare data for line chart (daily spending)
-  const dailySpending = getDailySpending(analysis.categories);
-  const lineChartData = {
-    labels: dailySpending.map(d => d.date),
-    datasets: [{
-      data: dailySpending.map(d => d.amount),
-    }],
+  // Process data for line chart
+  const processLineChartData = () => {
+    const dailySpending = new Map<string, number>();
+    const startDate = new Date(analysis.period.start);
+    const endDate = new Date(analysis.period.end);
+
+    // Initialize all dates in the period with 0
+    for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+      dailySpending.set(d.toISOString().split('T')[0], 0);
+    }
+
+    // Sum up spending for each day
+    analysis.transactions.forEach(transaction => {
+      const date = transaction.date.split('T')[0];
+      if (dailySpending.has(date)) {
+        dailySpending.set(date, dailySpending.get(date)! + Math.abs(transaction.amount));
+      }
+    });
+
+    // Convert to array and sort by date
+    const sortedData = Array.from(dailySpending.entries())
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([_, amount]) => amount);
+
+    // Group data into weeks
+    const weeklyData = [];
+    for (let i = 0; i < sortedData.length; i += 7) {
+      const weekTotal = sortedData.slice(i, i + 7).reduce((sum, amount) => sum + amount, 0);
+      weeklyData.push(weekTotal);
+    }
+
+    return {
+      labels: weeklyData.map((_, i) => `Week ${i + 1}`),
+      datasets: [
+        {
+          data: weeklyData,
+          color: (opacity = 1) => `rgba(255, 107, 107, ${opacity})`,
+          strokeWidth: 2,
+        },
+      ],
+    };
   };
+
+  const lineChartData = processLineChartData();
 
   return (
     <ScrollView style={styles.container}>
@@ -195,7 +232,7 @@ export default function AnalysisScreen() {
       </View>
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Daily Spending Trend</Text>
+        <Text style={styles.sectionTitle}>Weekly Spending Trend</Text>
         <View style={styles.chartContainer}>
           <LineChart
             data={lineChartData}
@@ -284,25 +321,6 @@ function getCategoryColor(category: string): string {
     'Other': '#95A5A6',
   };
   return colors[category] || '#95A5A6';
-}
-
-function getDailySpending(categories: any[]): { date: string; amount: number }[] {
-  // This is a simplified implementation that generates mock daily spending data
-  const days = 30;
-  const result = [];
-  const now = new Date();
-
-  for (let i = 0; i < days; i++) {
-    const date = new Date(now);
-    date.setDate(date.getDate() - i);
-    const amount = Math.random() * 200;
-    result.push({
-      date: date.toLocaleDateString(),
-      amount,
-    });
-  }
-
-  return result.reverse();
 }
 
 function generateReport(analysis: AnalysisResult): string {

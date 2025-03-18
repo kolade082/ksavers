@@ -1,6 +1,7 @@
 import * as FileSystem from 'expo-file-system';
 import { AnalysisResult, Transaction, Category, Insight } from '../types/analysis';
 import * as DocumentPicker from 'expo-document-picker';
+import { PDFParser } from './pdfParser';
 
 // Common spending categories and their keywords
 const CATEGORIES = {
@@ -74,10 +75,13 @@ export class BankStatementParser {
       let transactions: Transaction[] = [];
 
       if (fileType === 'pdf') {
-        // For now, we'll use mock data for PDFs since we can't parse them directly
-        // In a production app, you would want to use a server-side PDF parsing service
-        console.log('PDF parsing not supported in Expo, using mock data');
-        transactions = this.generateMockTransactions();
+        // Use the new PDF parser
+        try {
+          transactions = await PDFParser.parsePDF(fileUri);
+        } catch (error) {
+          console.warn('Server PDF parsing failed, falling back to local parsing');
+          transactions = await PDFParser.parsePDFLocally(fileUri);
+        }
       } else if (fileType === 'csv') {
         // Handle CSV files
         const content = await FileSystem.readAsStringAsync(fileUri);
@@ -100,13 +104,17 @@ export class BankStatementParser {
       // Generate insights
       const insights = this.generateInsights(categorizedTransactions, categories, totalSpending, totalIncome);
 
+      // Extract period from transactions
+      const period = this.extractPeriod(categorizedTransactions);
+
       return {
         totalSpending,
         totalIncome,
         netChange: totalIncome - totalSpending,
         categories,
         insights,
-        period: this.extractPeriod(categorizedTransactions),
+        period,
+        transactions: categorizedTransactions,
       };
     } catch (error) {
       console.error('Error parsing statement:', error);
