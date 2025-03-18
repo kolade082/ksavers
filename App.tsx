@@ -4,13 +4,20 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import SplashScreen from './src/screens/SplashScreen';
 import OnboardingScreen from './src/screens/OnboardingScreen';
+import AnalysisScreen from './src/screens/AnalysisScreen';
 import { MaterialIcons } from '@expo/vector-icons';
 import * as DocumentPicker from 'expo-document-picker';
 import { useState } from 'react';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from './src/types/navigation';
 
 const Stack = createNativeStackNavigator();
 
+type HomeScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Home'>;
+
 function HomeScreen() {
+  const navigation = useNavigation<HomeScreenNavigationProp>();
   const [isLoading, setIsLoading] = useState(false);
   const [selectedFile, setSelectedFile] = useState<DocumentPicker.DocumentPickerResult | null>(null);
 
@@ -32,20 +39,18 @@ function HomeScreen() {
     }
   };
 
-  const handleUpload = async () => {
-    if (!selectedFile) {
-      Alert.alert('Error', 'Please select a file first');
-      return;
-    }
-
+  const handleUpload = async (fileUri: string) => {
     try {
       setIsLoading(true);
-      // TODO: Implement actual file upload logic here
-      await new Promise(resolve => setTimeout(resolve, 2000)); // Simulated upload
-      Alert.alert('Success', 'Statement uploaded successfully!');
-      setSelectedFile(null);
-    } catch (err) {
-      Alert.alert('Error', 'Failed to upload statement');
+      // Simulate upload delay
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // Navigate to Analysis screen with the file URI
+      navigation.navigate('Analysis', { fileUri });
+      
+      Alert.alert('Success', 'Your bank statement has been uploaded and analyzed.');
+    } catch (error) {
+      Alert.alert('Error', 'Failed to upload your bank statement. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -106,7 +111,11 @@ function HomeScreen() {
 
         <TouchableOpacity
           style={[styles.submitButton, !selectedFile && styles.submitButtonDisabled]}
-          onPress={handleUpload}
+          onPress={() => {
+            if (selectedFile?.assets?.[0]?.uri) {
+              handleUpload(selectedFile.assets[0].uri);
+            }
+          }}
           disabled={!selectedFile || isLoading}
         >
           {isLoading ? (
@@ -134,6 +143,7 @@ export default function App() {
         <Stack.Screen name="Splash" component={SplashScreen} />
         <Stack.Screen name="Onboarding" component={OnboardingScreen} />
         <Stack.Screen name="Home" component={HomeScreen} />
+        <Stack.Screen name="Analysis" component={AnalysisScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
