@@ -1,13 +1,56 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, TouchableOpacity, SafeAreaView } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, SafeAreaView, ActivityIndicator, Alert } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import SplashScreen from './src/screens/SplashScreen';
 import OnboardingScreen from './src/screens/OnboardingScreen';
+import { MaterialIcons } from '@expo/vector-icons';
+import * as DocumentPicker from 'expo-document-picker';
+import { useState } from 'react';
 
 const Stack = createNativeStackNavigator();
 
 function HomeScreen() {
+  const [isLoading, setIsLoading] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<DocumentPicker.DocumentPickerResult | null>(null);
+
+  const pickDocument = async () => {
+    try {
+      setIsLoading(true);
+      const result = await DocumentPicker.getDocumentAsync({
+        type: ['application/pdf', 'image/*'],
+        copyToCacheDirectory: true,
+      });
+
+      if (result.assets && result.assets.length > 0) {
+        setSelectedFile(result);
+      }
+    } catch (err) {
+      Alert.alert('Error', 'Failed to pick document');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleUpload = async () => {
+    if (!selectedFile) {
+      Alert.alert('Error', 'Please select a file first');
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      // TODO: Implement actual file upload logic here
+      await new Promise(resolve => setTimeout(resolve, 2000)); // Simulated upload
+      Alert.alert('Success', 'Statement uploaded successfully!');
+      setSelectedFile(null);
+    } catch (err) {
+      Alert.alert('Error', 'Failed to upload statement');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
@@ -16,10 +59,61 @@ function HomeScreen() {
       
       <View style={styles.content}>
         <Text style={styles.welcomeText}>Welcome to KSavers!</Text>
-        <Text style={styles.subText}>Your personal savings companion</Text>
+        <Text style={styles.subText}>Upload your bank statement to analyze your spending patterns</Text>
         
-        <TouchableOpacity style={styles.button}>
-          <Text style={styles.buttonText}>Get Started</Text>
+        <View style={styles.uploadContainer}>
+          {selectedFile ? (
+            <View style={styles.filePreview}>
+              <MaterialIcons name="description" size={48} color="#2196F3" />
+              <Text style={styles.fileName} numberOfLines={1}>
+                {selectedFile?.assets?.[0]?.name || 'Unknown file'}
+              </Text>
+              <Text style={styles.fileSize}>
+                {selectedFile?.assets?.[0]?.size 
+                  ? `${(selectedFile.assets[0].size / 1024 / 1024).toFixed(2)} MB`
+                  : 'Unknown size'}
+              </Text>
+            </View>
+          ) : (
+            <TouchableOpacity
+              style={styles.uploadButton}
+              onPress={pickDocument}
+              disabled={isLoading}
+            >
+              <MaterialIcons name="cloud-upload" size={48} color="#2196F3" />
+              <Text style={styles.uploadText}>Select Statement</Text>
+              <Text style={styles.uploadSubtext}>
+                PDF or Image files (max 10MB)
+              </Text>
+            </TouchableOpacity>
+          )}
+        </View>
+
+        <View style={styles.infoContainer}>
+          <View style={styles.infoItem}>
+            <MaterialIcons name="security" size={24} color="#2196F3" />
+            <Text style={styles.infoText}>
+              Your data is encrypted and secure
+            </Text>
+          </View>
+          <View style={styles.infoItem}>
+            <MaterialIcons name="schedule" size={24} color="#2196F3" />
+            <Text style={styles.infoText}>
+              Analysis takes about 2-3 minutes
+            </Text>
+          </View>
+        </View>
+
+        <TouchableOpacity
+          style={[styles.submitButton, !selectedFile && styles.submitButtonDisabled]}
+          onPress={handleUpload}
+          disabled={!selectedFile || isLoading}
+        >
+          {isLoading ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.submitButtonText}>Upload & Analyze</Text>
+          )}
         </TouchableOpacity>
       </View>
       
@@ -62,8 +156,6 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
     padding: 20,
   },
   welcomeText: {
@@ -71,6 +163,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#333',
     marginBottom: 10,
+    textAlign: 'center',
   },
   subText: {
     fontSize: 16,
@@ -78,18 +171,75 @@ const styles = StyleSheet.create({
     marginBottom: 30,
     textAlign: 'center',
   },
-  button: {
-    backgroundColor: '#2196F3',
-    paddingHorizontal: 30,
-    paddingVertical: 15,
-    borderRadius: 25,
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
+  uploadContainer: {
+    marginBottom: 30,
   },
-  buttonText: {
+  uploadButton: {
+    width: '100%',
+    height: 200,
+    borderWidth: 2,
+    borderColor: '#2196F3',
+    borderStyle: 'dashed',
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#F5F9FF',
+  },
+  uploadText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#2196F3',
+    marginTop: 12,
+  },
+  uploadSubtext: {
+    fontSize: 14,
+    color: '#666',
+    marginTop: 4,
+  },
+  filePreview: {
+    width: '100%',
+    height: 200,
+    backgroundColor: '#F5F9FF',
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  fileName: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#333',
+    marginTop: 12,
+    textAlign: 'center',
+  },
+  fileSize: {
+    fontSize: 14,
+    color: '#666',
+    marginTop: 4,
+  },
+  infoContainer: {
+    marginBottom: 30,
+  },
+  infoItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  infoText: {
+    fontSize: 14,
+    color: '#666',
+    marginLeft: 12,
+  },
+  submitButton: {
+    backgroundColor: '#2196F3',
+    paddingVertical: 16,
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  submitButtonDisabled: {
+    backgroundColor: '#ccc',
+  },
+  submitButtonText: {
     color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',

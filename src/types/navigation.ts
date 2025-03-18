@@ -2,6 +2,7 @@ export type RootStackParamList = {
   Splash: undefined;
   Onboarding: undefined;
   Home: undefined;
+  UploadStatement: undefined;
 };
 
 export type Feature = {
