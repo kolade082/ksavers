@@ -58,6 +58,10 @@ function HomeScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.headerText}>KSavers</Text>
+      </View>
+      
       <View style={styles.content}>
         <Text style={styles.welcomeText}>Welcome to KSavers!</Text>
         <Text style={styles.subText}>Upload your bank statement to analyze your spending patterns</Text>
@@ -149,6 +153,16 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f5f5f5',
+  },
+  header: {
+    backgroundColor: '#2196F3',
+    padding: 20,
+    alignItems: 'center',
+  },
+  headerText: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#fff',
   },
   content: {
     flex: 1,
