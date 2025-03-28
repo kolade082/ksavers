@@ -10,8 +10,8 @@ interface ProfileScreenProps {
 
 // Mock user data
 const mockUserData = {
-  name: 'John Doe',
-  email: 'john.doe@example.com',
+  name: 'Kolade Dara',
+  email: 'koladedara@outlook.com',
   joinDate: 'January 2024',
   totalAnalyses: 12,
   totalSavings: '£2,500',

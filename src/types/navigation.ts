@@ -10,6 +10,10 @@ export type RootStackParamList = {
   };
   SavingsSuggestions: undefined;
   Profile: undefined;
+  History: undefined;
+  AnalysisDetail: {
+    analysisId: string;
+  };
 };
 
 export type NavigationProp = NativeStackNavigationProp<RootStackParamList>;

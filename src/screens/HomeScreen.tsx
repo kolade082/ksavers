@@ -10,7 +10,7 @@ interface HomeScreenProps {
 
 // Mock data for demonstration
 const mockData = {
-  userName: 'John',
+  userName: 'Kolade',
   totalSavings: '£2,500',
   monthlyBudget: '£3,000',
   lastAnalysis: '2 days ago',
@@ -44,6 +44,11 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     }
   };
 
+  const handleHistoryPress = () => {
+    console.log('Navigating to History screen');
+    navigation.navigate('History');
+  };
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView style={styles.container}>
@@ -53,12 +58,20 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
             <Text style={styles.welcomeText}>Welcome back,</Text>
             <Text style={styles.userName}>{mockData.userName}</Text>
           </View>
-          <TouchableOpacity 
-            style={styles.profileButton}
-            onPress={() => navigation.navigate('Profile')}
-          >
-            <MaterialIcons name="account-circle" size={40} color="#333" />
-          </TouchableOpacity>
+          <View style={styles.headerButtons}>
+            <TouchableOpacity 
+              style={styles.headerButton}
+              onPress={handleHistoryPress}
+            >
+              <MaterialIcons name="history" size={24} color="#333" />
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={styles.headerButton}
+              onPress={() => navigation.navigate('Profile')}
+            >
+              <MaterialIcons name="account-circle" size={24} color="#333" />
+            </TouchableOpacity>
+          </View>
         </View>
 
         {/* Quick Stats */}
@@ -153,8 +166,13 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#333',
   },
-  profileButton: {
-    padding: 8,
+  headerButtons: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+  },
+  headerButton: {
+    padding: 4,
   },
   statsContainer: {
     flexDirection: 'row',
