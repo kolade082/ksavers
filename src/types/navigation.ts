@@ -9,6 +9,7 @@ export type RootStackParamList = {
     fileUri: string;
   };
   SavingsSuggestions: undefined;
+  Profile: undefined;
 };
 
 export type NavigationProp = NativeStackNavigationProp<RootStackParamList>;

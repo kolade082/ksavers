@@ -53,7 +53,10 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
             <Text style={styles.welcomeText}>Welcome back,</Text>
             <Text style={styles.userName}>{mockData.userName}</Text>
           </View>
-          <TouchableOpacity style={styles.profileButton}>
+          <TouchableOpacity 
+            style={styles.profileButton}
+            onPress={() => navigation.navigate('Profile')}
+          >
             <MaterialIcons name="account-circle" size={40} color="#333" />
           </TouchableOpacity>
         </View>

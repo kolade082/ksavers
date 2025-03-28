@@ -8,6 +8,7 @@ import HomeScreen from './src/screens/HomeScreen';
 import UploadStatementScreen from './src/screens/UploadStatementScreen';
 import AnalysisScreen from './src/screens/AnalysisScreen';
 import SavingsSuggestionsScreen from './src/screens/SavingsSuggestionsScreen';
+import ProfileScreen from './src/screens/ProfileScreen';
 import { RootStackParamList } from './src/types/navigation';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -27,6 +28,7 @@ export default function App() {
         <Stack.Screen name="UploadStatement" component={UploadStatementScreen} />
         <Stack.Screen name="Analysis" component={AnalysisScreen} />
         <Stack.Screen name="SavingsSuggestions" component={SavingsSuggestionsScreen} />
+        <Stack.Screen name="Profile" component={ProfileScreen} />
       </Stack.Navigator>
       <StatusBar style="auto" />
     </NavigationContainer>
