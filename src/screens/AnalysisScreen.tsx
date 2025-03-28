@@ -1,8 +1,15 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Dimensions, TouchableOpacity } from 'react-native';
 import { BarChart, LineChart } from 'react-native-chart-kit';
 import { MaterialIcons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { RouteProp } from '@react-navigation/native';
+import { RootStackParamList } from '../types/navigation';
+
+interface AnalysisScreenProps {
+  route: RouteProp<RootStackParamList, 'Analysis'>;
+  navigation: any; // We'll type this properly later
+}
 
 // Mock data for demonstration
 const mockData = {
@@ -40,7 +47,7 @@ const CHART_CONFIG = {
   useShadowColorFromDataset: false,
 };
 
-export default function AnalysisScreen() {
+function AnalysisScreen({ route, navigation }: AnalysisScreenProps) {
   // Prepare data for bar chart
   const barChartData = {
     labels: mockData.categories.map(cat => cat.name),
@@ -60,6 +67,16 @@ export default function AnalysisScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea}>
+      <View style={styles.header}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => navigation.goBack()}
+        >
+          <MaterialIcons name="arrow-back" size={24} color="#333" />
+        </TouchableOpacity>
+        <Text style={styles.headerText}>Analysis</Text>
+      </View>
+
       <ScrollView style={styles.container}>
         {/* Summary Cards */}
         <View style={styles.summaryContainer}>
@@ -165,6 +182,18 @@ export default function AnalysisScreen() {
             </View>
           ))}
         </View>
+
+        {/* Add this after the category breakdown section */}
+        <View style={styles.suggestionsSection}>
+          <Text style={styles.sectionTitle}>Ready to save more?</Text>
+          <TouchableOpacity
+            style={styles.suggestionsButton}
+            onPress={() => navigation.navigate('SavingsSuggestions')}
+          >
+            <MaterialIcons name="savings" size={24} color="#fff" />
+            <Text style={styles.suggestionsButtonText}>View Savings Tips</Text>
+          </TouchableOpacity>
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -177,6 +206,20 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    backgroundColor: '#fff',
+  },
+  backButton: {
+    padding: 8,
+  },
+  headerText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginLeft: 16,
   },
   summaryContainer: {
     flexDirection: 'row',
@@ -276,4 +319,28 @@ const styles = StyleSheet.create({
     borderRadius: 2,
     marginLeft: 12,
   },
-}); 
+  suggestionsSection: {
+    padding: 20,
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    marginTop: 20,
+    marginHorizontal: 16,
+    alignItems: 'center',
+  },
+  suggestionsButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#4CAF50',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+  },
+  suggestionsButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+    marginLeft: 8,
+  },
+});
+
+export default AnalysisScreen; 
