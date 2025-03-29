@@ -1,144 +1,131 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Dimensions, FlatList } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import React from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  SafeAreaView,
+  Dimensions,
+} from 'react-native';
+import { MaterialIcons } from '@expo/vector-icons';
 import { RootStackParamList, Feature } from '../types/navigation';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+
+type OnboardingScreenProps = NativeStackScreenProps<RootStackParamList, 'Onboarding'>;
 
 const { width } = Dimensions.get('window');
 
 const features: Feature[] = [
   {
     id: '1',
-    title: 'Track Your Savings',
-    description: 'Monitor your savings goals and track your progress in real-time.',
-    icon: '💰',
+    title: 'Smart Analysis',
+    description: 'Upload your bank statement and get instant insights into your spending patterns.',
+    icon: 'analytics',
   },
   {
     id: '2',
-    title: 'Smart Budgeting',
-    description: 'Create and manage budgets to help you save more effectively.',
-    icon: '📊',
+    title: 'Savings Tips',
+    description: 'Receive personalized recommendations to help you save more money.',
+    icon: 'savings',
   },
   {
     id: '3',
-    title: 'Financial Insights',
-    description: 'Get personalized insights and recommendations to improve your savings.',
-    icon: '📈',
+    title: 'Track Progress',
+    description: 'Monitor your financial progress and see how your savings grow over time.',
+    icon: 'trending-up',
   },
 ];
 
-type OnboardingScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Onboarding'>;
-
-export default function OnboardingScreen() {
-  const navigation = useNavigation<OnboardingScreenNavigationProp>();
-  const [currentIndex, setCurrentIndex] = useState(0);
-
-  const renderFeature = ({ item }: { item: Feature }) => (
-    <View style={styles.featureContainer}>
-      <Text style={styles.featureIcon}>{item.icon}</Text>
-      <Text style={styles.featureTitle}>{item.title}</Text>
-      <Text style={styles.featureDescription}>{item.description}</Text>
-    </View>
-  );
-
+const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ navigation }) => {
   return (
-    <View style={styles.container}>
-      <FlatList
-        data={features}
-        renderItem={renderFeature}
-        horizontal
-        pagingEnabled
-        showsHorizontalScrollIndicator={false}
-        onMomentumScrollEnd={(event) => {
-          const index = Math.round(event.nativeEvent.contentOffset.x / width);
-          setCurrentIndex(index);
-        }}
-      />
-      
-      <View style={styles.pagination}>
-        {features.map((_, index) => (
-          <View
-            key={index}
-            style={[
-              styles.paginationDot,
-              index === currentIndex && styles.paginationDotActive,
-            ]}
-          />
-        ))}
-      </View>
+    <SafeAreaView style={styles.safeArea}>
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <Text style={styles.title}>Welcome to KSavers</Text>
+          <Text style={styles.subtitle}>Your personal finance companion</Text>
+        </View>
 
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() => navigation.replace('Home')}
-      >
-        <Text style={styles.buttonText}>Get Started</Text>
-      </TouchableOpacity>
-    </View>
+        <View style={styles.featuresContainer}>
+          {features.map((feature) => (
+            <View key={feature.id} style={styles.featureCard}>
+              <MaterialIcons name={feature.icon as any} size={40} color="#2196F3" />
+              <Text style={styles.featureTitle}>{feature.title}</Text>
+              <Text style={styles.featureDescription}>{feature.description}</Text>
+            </View>
+          ))}
+        </View>
+
+        <TouchableOpacity
+          style={styles.getStartedButton}
+          onPress={() => navigation.navigate('Login')}
+        >
+          <Text style={styles.getStartedText}>Get Started</Text>
+        </TouchableOpacity>
+      </View>
+    </SafeAreaView>
   );
-}
+};
 
 const styles = StyleSheet.create({
-  container: {
+  safeArea: {
     flex: 1,
     backgroundColor: '#fff',
   },
-  featureContainer: {
-    width,
+  container: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 20,
+    padding: 24,
   },
-  featureIcon: {
-    fontSize: 80,
-    marginBottom: 20,
+  header: {
+    marginTop: 60,
+    marginBottom: 40,
   },
-  featureTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
+  title: {
+    fontSize: 32,
+    fontWeight: '700',
     color: '#333',
-    marginBottom: 10,
-    textAlign: 'center',
+    marginBottom: 8,
   },
-  featureDescription: {
+  subtitle: {
     fontSize: 16,
     color: '#666',
-    textAlign: 'center',
-    paddingHorizontal: 20,
   },
-  pagination: {
-    flexDirection: 'row',
+  featuresContainer: {
+    flex: 1,
+    gap: 24,
+  },
+  featureCard: {
+    backgroundColor: '#f5f5f5',
+    borderRadius: 16,
+    padding: 24,
+    alignItems: 'center',
+    width: width - 48,
+  },
+  featureTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#333',
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  featureDescription: {
+    fontSize: 14,
+    color: '#666',
+    textAlign: 'center',
+    lineHeight: 20,
+  },
+  getStartedButton: {
+    backgroundColor: '#2196F3',
+    borderRadius: 12,
+    height: 56,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingVertical: 20,
+    marginBottom: 24,
   },
-  paginationDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: '#ccc',
-    marginHorizontal: 4,
-  },
-  paginationDotActive: {
-    backgroundColor: '#2196F3',
-  },
-  button: {
-    backgroundColor: '#2196F3',
-    paddingHorizontal: 30,
-    paddingVertical: 15,
-    borderRadius: 25,
-    marginHorizontal: 20,
-    marginBottom: 30,
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-  },
-  buttonText: {
+  getStartedText: {
     color: '#fff',
     fontSize: 16,
-    fontWeight: 'bold',
-    textAlign: 'center',
+    fontWeight: '600',
   },
-}); 
+});
+
+export default OnboardingScreen; 

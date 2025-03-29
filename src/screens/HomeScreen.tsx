@@ -45,7 +45,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   };
 
   const handleHistoryPress = () => {
-    console.log('Navigating to History screen');
+    // console.log('Navigating to History screen');
     navigation.navigate('History');
   };
 
