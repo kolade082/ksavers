@@ -2,22 +2,24 @@ import React, { useState } from 'react';
 import {
   View,
   Text,
-  StyleSheet,
   TextInput,
   TouchableOpacity,
-  SafeAreaView,
+  StyleSheet,
   KeyboardAvoidingView,
   Platform,
-  Alert,
+  ScrollView,
+  Image,
 } from 'react-native';
-import { MaterialIcons } from '@expo/vector-icons';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../types/navigation';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { MaterialIcons } from '@expo/vector-icons';
 
-type SignUpScreenProps = NativeStackScreenProps<RootStackParamList, 'SignUp'>;
+type SignUpScreenProps = {
+  navigation: NativeStackNavigationProp<RootStackParamList, 'SignUp'>;
+};
 
 const SignUpScreen: React.FC<SignUpScreenProps> = ({ navigation }) => {
-  const [name, setName] = useState('');
+  const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -25,34 +27,23 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ navigation }) => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleSignUp = () => {
-    if (!name || !email || !password || !confirmPassword) {
-      Alert.alert('Error', 'Please fill in all fields');
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      Alert.alert('Error', 'Passwords do not match');
-      return;
-    }
-
-    if (password.length < 6) {
-      Alert.alert('Error', 'Password must be at least 6 characters long');
-      return;
-    }
-
-    // TODO: Implement actual signup
+    // TODO: Implement actual sign up logic
     navigation.replace('Home');
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.container}
+    <KeyboardAvoidingView 
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={styles.container}
+    >
+      <ScrollView 
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
       >
         <View style={styles.header}>
+          <Text style={styles.logo}>KS</Text>
           <Text style={styles.title}>Create Account</Text>
-          <Text style={styles.subtitle}>Sign up to get started</Text>
+          <Text style={styles.subtitle}>Join KSavers today</Text>
         </View>
 
         <View style={styles.form}>
@@ -61,9 +52,10 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ navigation }) => {
             <TextInput
               style={styles.input}
               placeholder="Full Name"
-              value={name}
-              onChangeText={setName}
+              value={fullName}
+              onChangeText={setFullName}
               autoCapitalize="words"
+              autoComplete="name"
             />
           </View>
 
@@ -76,6 +68,7 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ navigation }) => {
               onChangeText={setEmail}
               keyboardType="email-address"
               autoCapitalize="none"
+              autoComplete="email"
             />
           </View>
 
@@ -88,14 +81,14 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ navigation }) => {
               onChangeText={setPassword}
               secureTextEntry={!showPassword}
             />
-            <TouchableOpacity
+            <TouchableOpacity 
               onPress={() => setShowPassword(!showPassword)}
-              style={styles.passwordToggle}
+              style={styles.eyeIcon}
             >
-              <MaterialIcons
-                name={showPassword ? 'visibility-off' : 'visibility'}
-                size={24}
-                color="#666"
+              <MaterialIcons 
+                name={showPassword ? "visibility" : "visibility-off"} 
+                size={24} 
+                color="#666" 
               />
             </TouchableOpacity>
           </View>
@@ -109,50 +102,60 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ navigation }) => {
               onChangeText={setConfirmPassword}
               secureTextEntry={!showConfirmPassword}
             />
-            <TouchableOpacity
+            <TouchableOpacity 
               onPress={() => setShowConfirmPassword(!showConfirmPassword)}
-              style={styles.passwordToggle}
+              style={styles.eyeIcon}
             >
-              <MaterialIcons
-                name={showConfirmPassword ? 'visibility-off' : 'visibility'}
-                size={24}
-                color="#666"
+              <MaterialIcons 
+                name={showConfirmPassword ? "visibility" : "visibility-off"} 
+                size={24} 
+                color="#666" 
               />
             </TouchableOpacity>
           </View>
 
-          <TouchableOpacity style={styles.signUpButton} onPress={handleSignUp}>
+          <TouchableOpacity 
+            style={styles.signUpButton}
+            onPress={handleSignUp}
+          >
             <Text style={styles.signUpButtonText}>Create Account</Text>
           </TouchableOpacity>
 
-          <View style={styles.loginContainer}>
-            <Text style={styles.loginText}>Already have an account? </Text>
+          <View style={styles.signInContainer}>
+            <Text style={styles.signInText}>Already have an account? </Text>
             <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-              <Text style={styles.loginLink}>Sign In</Text>
+              <Text style={styles.signInLink}>Sign In</Text>
             </TouchableOpacity>
           </View>
         </View>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 };
 
 const styles = StyleSheet.create({
-  safeArea: {
+  container: {
     flex: 1,
     backgroundColor: '#fff',
   },
-  container: {
-    flex: 1,
-    padding: 24,
+  scrollContent: {
+    flexGrow: 1,
+    padding: 20,
   },
   header: {
+    alignItems: 'center',
     marginTop: 60,
     marginBottom: 40,
   },
+  logo: {
+    fontSize: 48,
+    fontWeight: 'bold',
+    color: '#007AFF',
+    marginBottom: 20,
+  },
   title: {
-    fontSize: 32,
-    fontWeight: '700',
+    fontSize: 28,
+    fontWeight: 'bold',
     color: '#333',
     marginBottom: 8,
   },
@@ -161,7 +164,7 @@ const styles = StyleSheet.create({
     color: '#666',
   },
   form: {
-    flex: 1,
+    width: '100%',
   },
   inputContainer: {
     flexDirection: 'row',
@@ -180,11 +183,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#333',
   },
-  passwordToggle: {
-    padding: 4,
+  eyeIcon: {
+    padding: 8,
   },
   signUpButton: {
-    backgroundColor: '#2196F3',
+    backgroundColor: '#007AFF',
     borderRadius: 12,
     height: 56,
     justifyContent: 'center',
@@ -196,17 +199,17 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
-  loginContainer: {
+  signInContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  loginText: {
+  signInText: {
     color: '#666',
     fontSize: 14,
   },
-  loginLink: {
-    color: '#2196F3',
+  signInLink: {
+    color: '#007AFF',
     fontSize: 14,
     fontWeight: '600',
   },

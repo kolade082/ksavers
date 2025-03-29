@@ -2,19 +2,21 @@ import React, { useState } from 'react';
 import {
   View,
   Text,
-  StyleSheet,
   TextInput,
   TouchableOpacity,
-  SafeAreaView,
+  StyleSheet,
   KeyboardAvoidingView,
   Platform,
-  Alert,
+  ScrollView,
+  Image,
 } from 'react-native';
-import { MaterialIcons } from '@expo/vector-icons';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../types/navigation';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { MaterialIcons } from '@expo/vector-icons';
 
-type LoginScreenProps = NativeStackScreenProps<RootStackParamList, 'Login'>;
+type LoginScreenProps = {
+  navigation: NativeStackNavigationProp<RootStackParamList, 'Login'>;
+};
 
 const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
   const [email, setEmail] = useState('');
@@ -22,23 +24,22 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
   const [showPassword, setShowPassword] = useState(false);
 
   const handleLogin = () => {
-    // TODO: Implement actual authentication
-    if (!email || !password) {
-      Alert.alert('Error', 'Please fill in all fields');
-      return;
-    }
-    // For now, just navigate to Home
+    // TODO: Implement actual login logic
     navigation.replace('Home');
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.container}
+    <KeyboardAvoidingView 
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={styles.container}
+    >
+      <ScrollView 
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
       >
         <View style={styles.header}>
-          <Text style={styles.title}>Welcome Back</Text>
+          <Text style={styles.logo}>KS</Text>
+          <Text style={styles.title}>Welcome Back!</Text>
           <Text style={styles.subtitle}>Sign in to continue</Text>
         </View>
 
@@ -52,6 +53,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
               onChangeText={setEmail}
               keyboardType="email-address"
               autoCapitalize="none"
+              autoComplete="email"
             />
           </View>
 
@@ -64,54 +66,67 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
               onChangeText={setPassword}
               secureTextEntry={!showPassword}
             />
-            <TouchableOpacity
+            <TouchableOpacity 
               onPress={() => setShowPassword(!showPassword)}
-              style={styles.passwordToggle}
+              style={styles.eyeIcon}
             >
-              <MaterialIcons
-                name={showPassword ? 'visibility-off' : 'visibility'}
-                size={24}
-                color="#666"
+              <MaterialIcons 
+                name={showPassword ? "visibility" : "visibility-off"} 
+                size={24} 
+                color="#666" 
               />
             </TouchableOpacity>
           </View>
 
-          <TouchableOpacity style={styles.forgotPassword}>
+          <TouchableOpacity 
+            style={styles.forgotPassword}
+            onPress={() => {/* TODO: Implement forgot password */}}
+          >
             <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
+          <TouchableOpacity 
+            style={styles.loginButton}
+            onPress={handleLogin}
+          >
             <Text style={styles.loginButtonText}>Sign In</Text>
           </TouchableOpacity>
 
-          <View style={styles.signupContainer}>
-            <Text style={styles.signupText}>Don't have an account? </Text>
+          <View style={styles.signUpContainer}>
+            <Text style={styles.signUpText}>Don't have an account? </Text>
             <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
-              <Text style={styles.signupLink}>Sign Up</Text>
+              <Text style={styles.signUpLink}>Sign Up</Text>
             </TouchableOpacity>
           </View>
         </View>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 };
 
 const styles = StyleSheet.create({
-  safeArea: {
+  container: {
     flex: 1,
     backgroundColor: '#fff',
   },
-  container: {
-    flex: 1,
-    padding: 24,
+  scrollContent: {
+    flexGrow: 1,
+    padding: 20,
   },
   header: {
+    alignItems: 'center',
     marginTop: 60,
     marginBottom: 40,
   },
+  logo: {
+    fontSize: 48,
+    fontWeight: 'bold',
+    color: '#007AFF',
+    marginBottom: 20,
+  },
   title: {
-    fontSize: 32,
-    fontWeight: '700',
+    fontSize: 28,
+    fontWeight: 'bold',
     color: '#333',
     marginBottom: 8,
   },
@@ -120,7 +135,7 @@ const styles = StyleSheet.create({
     color: '#666',
   },
   form: {
-    flex: 1,
+    width: '100%',
   },
   inputContainer: {
     flexDirection: 'row',
@@ -139,19 +154,19 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#333',
   },
-  passwordToggle: {
-    padding: 4,
+  eyeIcon: {
+    padding: 8,
   },
   forgotPassword: {
     alignSelf: 'flex-end',
     marginBottom: 24,
   },
   forgotPasswordText: {
-    color: '#2196F3',
+    color: '#007AFF',
     fontSize: 14,
   },
   loginButton: {
-    backgroundColor: '#2196F3',
+    backgroundColor: '#007AFF',
     borderRadius: 12,
     height: 56,
     justifyContent: 'center',
@@ -163,17 +178,17 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
-  signupContainer: {
+  signUpContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  signupText: {
+  signUpText: {
     color: '#666',
     fontSize: 14,
   },
-  signupLink: {
-    color: '#2196F3',
+  signUpLink: {
+    color: '#007AFF',
     fontSize: 14,
     fontWeight: '600',
   },
