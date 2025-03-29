@@ -58,8 +58,8 @@ const HistoryScreen: React.FC<HistoryScreenProps> = ({ navigation }) => {
   const filterAnimation = new Animated.Value(0);
   const cardAnimations = mockAnalyses.map(() => new Animated.Value(0));
 
-  console.log('HistoryScreen rendered');
-  console.log('Mock analyses:', mockAnalyses);
+//   console.log('HistoryScreen rendered');
+//   console.log('Mock analyses:', mockAnalyses);
 
   // Start card animations when component mounts
   React.useEffect(() => {
