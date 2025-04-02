@@ -2,12 +2,30 @@
 
 #import <React/RCTBundleURLProvider.h>
 #import <React/RCTLinkingManager.h>
+#import <FirebaseCore/FirebaseCore.h>
+#import <FirebaseAnalytics/FirebaseAnalytics.h>
 
 @implementation AppDelegate
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
   self.moduleName = @"main";
+
+  // Initialize Firebase with debug logging
+  NSLog(@"[Firebase] Starting Firebase initialization...");
+  [FIRApp configure];
+  
+  // Enable Firebase Analytics debug mode
+  [FIRAnalytics setAnalyticsCollectionEnabled:YES];
+  [FIRAnalytics setSessionTimeoutInterval:120];
+  
+  // Log Firebase configuration status
+  if ([FIRApp defaultApp]) {
+    NSLog(@"[Firebase] Successfully initialized Firebase");
+    NSLog(@"[Firebase] Analytics collection enabled: %d", [FIRAnalytics isAnalyticsCollectionEnabled]);
+  } else {
+    NSLog(@"[Firebase] Failed to initialize Firebase");
+  }
 
   // You can add your custom initial props in the dictionary below.
   // They will be passed down to the ViewController used by React Native.
