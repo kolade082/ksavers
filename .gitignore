@@ -42,3 +42,6 @@ yarn-error.*
 .vscode/
 *.swp
 *.swo
+
+# New additions
+.env
