@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import {
   View,
-  Text,
   TextInput,
   TouchableOpacity,
   StyleSheet,
@@ -15,6 +14,9 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../types/navigation';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
+import ThemedView from '../components/ThemedView';
+import ThemedText from '../components/ThemedText';
 
 type LoginScreenProps = {
   navigation: NativeStackNavigationProp<RootStackParamList, 'Login'>;
@@ -26,6 +28,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const { signIn } = useAuth();
+  const { colors } = useTheme();
 
   const validateForm = () => {
     if (!email.trim()) {
@@ -84,24 +87,25 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
   return (
     <KeyboardAvoidingView 
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={styles.container}
+      style={[styles.container, { backgroundColor: colors.background }]}
     >
       <ScrollView 
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.header}>
-          <Text style={styles.logo}>KS</Text>
-          <Text style={styles.title}>Welcome Back!</Text>
-          <Text style={styles.subtitle}>Sign in to continue</Text>
+          <ThemedText style={styles.logo}>KS</ThemedText>
+          <ThemedText variant="title">Welcome Back!</ThemedText>
+          <ThemedText variant="caption">Sign in to continue</ThemedText>
         </View>
 
         <View style={styles.form}>
-          <View style={styles.inputContainer}>
-            <MaterialIcons name="email" size={24} color="#666" style={styles.inputIcon} />
+          <View style={[styles.inputContainer, { backgroundColor: colors.card }]}>
+            <MaterialIcons name="email" size={24} color={colors.text} style={styles.inputIcon} />
             <TextInput
-              style={styles.input}
+              style={[styles.input, { color: colors.text }]}
               placeholder="Email"
+              placeholderTextColor={colors.placeholder}
               value={email}
               onChangeText={setEmail}
               keyboardType="email-address"
@@ -111,11 +115,12 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
             />
           </View>
 
-          <View style={styles.inputContainer}>
-            <MaterialIcons name="lock" size={24} color="#666" style={styles.inputIcon} />
+          <View style={[styles.inputContainer, { backgroundColor: colors.card }]}>
+            <MaterialIcons name="lock" size={24} color={colors.text} style={styles.inputIcon} />
             <TextInput
-              style={[styles.input, { flex: 1 }]}
+              style={[styles.input, { flex: 1, color: colors.text }]}
               placeholder="Password"
+              placeholderTextColor={colors.placeholder}
               value={password}
               onChangeText={setPassword}
               secureTextEntry={!showPassword}
@@ -129,7 +134,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
               <MaterialIcons 
                 name={showPassword ? "visibility" : "visibility-off"} 
                 size={24} 
-                color="#666" 
+                color={colors.text} 
               />
             </TouchableOpacity>
           </View>
@@ -139,28 +144,28 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
             onPress={() => {/* TODO: Implement forgot password */}}
             disabled={loading}
           >
-            <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
+            <ThemedText style={{ color: colors.primary }}>Forgot Password?</ThemedText>
           </TouchableOpacity>
 
           <TouchableOpacity 
-            style={[styles.loginButton, loading && styles.buttonDisabled]}
+            style={[styles.loginButton, { backgroundColor: colors.primary }, loading && styles.buttonDisabled]}
             onPress={handleLogin}
             disabled={loading}
           >
             {loading ? (
               <ActivityIndicator color="#fff" />
             ) : (
-              <Text style={styles.loginButtonText}>Sign In</Text>
+              <ThemedText style={styles.loginButtonText}>Sign In</ThemedText>
             )}
           </TouchableOpacity>
 
           <View style={styles.signUpContainer}>
-            <Text style={styles.signUpText}>Don't have an account? </Text>
+            <ThemedText>Don't have an account? </ThemedText>
             <TouchableOpacity 
               onPress={() => navigation.navigate('SignUp')}
               disabled={loading}
             >
-              <Text style={styles.signUpLink}>Sign Up</Text>
+              <ThemedText style={{ color: colors.primary }}>Sign Up</ThemedText>
             </TouchableOpacity>
           </View>
         </View>
@@ -172,7 +177,6 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
   },
   scrollContent: {
     flexGrow: 1,
@@ -186,18 +190,7 @@ const styles = StyleSheet.create({
   logo: {
     fontSize: 48,
     fontWeight: 'bold',
-    color: '#007AFF',
     marginBottom: 20,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 8,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#666',
   },
   form: {
     width: '100%',
@@ -205,7 +198,6 @@ const styles = StyleSheet.create({
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#f5f5f5',
     borderRadius: 12,
     marginBottom: 16,
     paddingHorizontal: 16,
@@ -217,7 +209,6 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     fontSize: 16,
-    color: '#333',
   },
   eyeIcon: {
     padding: 8,
@@ -226,12 +217,7 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-end',
     marginBottom: 24,
   },
-  forgotPasswordText: {
-    color: '#007AFF',
-    fontSize: 14,
-  },
   loginButton: {
-    backgroundColor: '#007AFF',
     borderRadius: 12,
     height: 56,
     justifyContent: 'center',
@@ -250,15 +236,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  signUpText: {
-    color: '#666',
-    fontSize: 14,
-  },
-  signUpLink: {
-    color: '#007AFF',
-    fontSize: 14,
-    fontWeight: '600',
   },
 });
 

@@ -1,22 +1,64 @@
-import React, { useState } from 'react';
-import { View, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
+import React from 'react';
+import { View, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useTheme } from '../context/ThemeContext';
 import ThemedView from '../components/ThemedView';
 import ThemedText from '../components/ThemedText';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../types/navigation';
+
+type AnalysisDetailsProps = {
+  navigation: NativeStackNavigationProp<RootStackParamList, 'AnalysisDetails'>;
+};
 
 // Mock data for demonstration
-const mockAnalysis = {
-  totalSpent: '£2,500',
-  totalSaved: '£500',
-  savingsRate: '16.7%',
+const mockDetails = {
+  id: '1',
+  date: '2024-03-15',
+  fileName: 'Statement_March_2024.pdf',
+  summary: {
+    totalSpent: '£2,500',
+    totalIncome: '£3,000',
+    netChange: '£500',
+    savingsRate: '16.7%',
+  },
   categories: [
-    { name: 'Groceries', amount: '£800', percentage: 32 },
-    { name: 'Transport', amount: '£400', percentage: 16 },
-    { name: 'Entertainment', amount: '£300', percentage: 12 },
-    { name: 'Utilities', amount: '£250', percentage: 10 },
-    { name: 'Shopping', amount: '£750', percentage: 30 },
+    {
+      name: 'Groceries',
+      amount: '£800',
+      percentage: 32,
+      trend: 'up',
+      change: '+15%',
+    },
+    {
+      name: 'Transport',
+      amount: '£400',
+      percentage: 16,
+      trend: 'down',
+      change: '-5%',
+    },
+    {
+      name: 'Entertainment',
+      amount: '£300',
+      percentage: 12,
+      trend: 'up',
+      change: '+10%',
+    },
+    {
+      name: 'Utilities',
+      amount: '£250',
+      percentage: 10,
+      trend: 'stable',
+      change: '0%',
+    },
+    {
+      name: 'Shopping',
+      amount: '£750',
+      percentage: 30,
+      trend: 'up',
+      change: '+20%',
+    },
   ],
   insights: [
     {
@@ -37,9 +79,43 @@ const mockAnalysis = {
   ],
 };
 
-const AnalysisScreen = () => {
-  const [loading, setLoading] = useState(false);
+const AnalysisDetails: React.FC<AnalysisDetailsProps> = ({ navigation }) => {
   const { colors } = useTheme();
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-GB', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    });
+  };
+
+  const getTrendIcon = (trend: string) => {
+    switch (trend) {
+      case 'up':
+        return 'trending-up';
+      case 'down':
+        return 'trending-down';
+      case 'stable':
+        return 'trending-flat';
+      default:
+        return 'trending-flat';
+    }
+  };
+
+  const getTrendColor = (trend: string) => {
+    switch (trend) {
+      case 'up':
+        return colors.error;
+      case 'down':
+        return colors.success;
+      case 'stable':
+        return colors.text;
+      default:
+        return colors.text;
+    }
+  };
 
   const getInsightIcon = (type: string) => {
     switch (type) {
@@ -67,14 +143,24 @@ const AnalysisScreen = () => {
     }
   };
 
+  const handleViewSavingsTips = () => {
+    console.log('Attempting to navigate to SavingsSuggestions');
+    try {
+      navigation.navigate('SavingsSuggestions');
+      console.log('Navigation successful');
+    } catch (error) {
+      console.error('Navigation error:', error);
+    }
+  };
+
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
       <ScrollView style={styles.container}>
         {/* Header */}
         <ThemedView useCard style={styles.header}>
           <View>
-            <ThemedText variant="title">Analysis Results</ThemedText>
-            <ThemedText variant="caption">Based on your bank statement</ThemedText>
+            <ThemedText variant="title">Analysis Details</ThemedText>
+            <ThemedText variant="caption">{formatDate(mockDetails.date)}</ThemedText>
           </View>
           <TouchableOpacity style={styles.shareButton}>
             <MaterialIcons name="share" size={24} color={colors.primary} />
@@ -85,29 +171,44 @@ const AnalysisScreen = () => {
         <ThemedView useCard style={styles.summaryContainer}>
           <View style={[styles.summaryCard, { backgroundColor: colors.background }]}>
             <MaterialIcons name="account-balance-wallet" size={24} color={colors.primary} />
-            <ThemedText variant="subtitle">{mockAnalysis.totalSpent}</ThemedText>
+            <ThemedText variant="subtitle">{mockDetails.summary.totalSpent}</ThemedText>
             <ThemedText variant="caption">Total Spent</ThemedText>
           </View>
           <View style={[styles.summaryCard, { backgroundColor: colors.background }]}>
             <MaterialIcons name="savings" size={24} color={colors.success} />
-            <ThemedText variant="subtitle">{mockAnalysis.totalSaved}</ThemedText>
-            <ThemedText variant="caption">Total Saved</ThemedText>
+            <ThemedText variant="subtitle">{mockDetails.summary.totalIncome}</ThemedText>
+            <ThemedText variant="caption">Total Income</ThemedText>
           </View>
           <View style={[styles.summaryCard, { backgroundColor: colors.background }]}>
             <MaterialIcons name="trending-up" size={24} color={colors.info} />
-            <ThemedText variant="subtitle">{mockAnalysis.savingsRate}</ThemedText>
-            <ThemedText variant="caption">Savings Rate</ThemedText>
+            <ThemedText variant="subtitle">{mockDetails.summary.netChange}</ThemedText>
+            <ThemedText variant="caption">Net Change</ThemedText>
           </View>
         </ThemedView>
 
-        {/* Spending Categories */}
+        {/* Categories */}
         <ThemedView useCard style={styles.section}>
           <ThemedText variant="subtitle">Spending Categories</ThemedText>
-          {mockAnalysis.categories.map((category, index) => (
+          {mockDetails.categories.map((category, index) => (
             <View key={index} style={styles.categoryItem}>
               <View style={styles.categoryHeader}>
-                <ThemedText>{category.name}</ThemedText>
-                <ThemedText>{category.amount}</ThemedText>
+                <View style={styles.categoryInfo}>
+                  <ThemedText variant="body">{category.name}</ThemedText>
+                  <View style={styles.trendContainer}>
+                    <MaterialIcons 
+                      name={getTrendIcon(category.trend)} 
+                      size={16} 
+                      color={getTrendColor(category.trend)} 
+                    />
+                    <ThemedText 
+                      variant="caption" 
+                      style={{ color: getTrendColor(category.trend), marginLeft: 4 }}
+                    >
+                      {category.change}
+                    </ThemedText>
+                  </View>
+                </View>
+                <ThemedText variant="body">{category.amount}</ThemedText>
               </View>
               <View style={[styles.progressBar, { backgroundColor: colors.border }]}>
                 <View 
@@ -128,7 +229,7 @@ const AnalysisScreen = () => {
         {/* Insights */}
         <ThemedView useCard style={styles.section}>
           <ThemedText variant="subtitle">Insights</ThemedText>
-          {mockAnalysis.insights.map((insight, index) => (
+          {mockDetails.insights.map((insight, index) => (
             <View key={index} style={styles.insightItem}>
               <MaterialIcons 
                 name={getInsightIcon(insight.type)} 
@@ -156,7 +257,7 @@ const AnalysisScreen = () => {
           </TouchableOpacity>
           <TouchableOpacity 
             style={[styles.actionButton, { backgroundColor: colors.success }]}
-            onPress={() => {/* TODO: Navigate to savings suggestions */}}
+            onPress={handleViewSavingsTips}
           >
             <MaterialIcons name="lightbulb" size={24} color="#fff" />
             <ThemedText style={styles.actionButtonText}>View Savings Tips</ThemedText>
@@ -205,7 +306,16 @@ const styles = StyleSheet.create({
   categoryHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center',
     marginBottom: 8,
+  },
+  categoryInfo: {
+    flex: 1,
+  },
+  trendContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 4,
   },
   progressBar: {
     height: 8,
@@ -247,4 +357,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default AnalysisScreen; 
+export default AnalysisDetails; 

@@ -3,24 +3,28 @@ import { StyleSheet } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { AuthProvider } from './src/context/AuthContext';
+import { ThemeProvider, useTheme } from './src/context/ThemeContext';
 import AuthNavigator from './src/navigation/AuthNavigator';
 import SplashScreen from './src/screens/SplashScreen';
 import OnboardingScreen from './src/screens/OnboardingScreen';
 import LoginScreen from './src/screens/LoginScreen';
 import SignUpScreen from './src/screens/SignUpScreen';
 import HomeScreen from './src/screens/HomeScreen';
-import UploadStatementScreen from './src/screens/UploadStatementScreen';
+import UploadStatement from './src/screens/UploadStatement';
 import AnalysisScreen from './src/screens/AnalysisScreen';
-import SavingsSuggestionsScreen from './src/screens/SavingsSuggestionsScreen';
+import AnalysisDetails from './src/screens/AnalysisDetails';
+import SavingsSuggestions from './src/screens/SavingsSuggestions';
 import ProfileScreen from './src/screens/ProfileScreen';
 import HistoryScreen from './src/screens/HistoryScreen';
-import AnalysisDetailScreen from './src/screens/AnalysisDetailScreen';
 import EmailVerificationScreen from './src/screens/EmailVerificationScreen';
 import { RootStackParamList } from './src/types/navigation';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
-export default function App() {
+// Create a component that uses the theme context
+const AppContent = () => {
+  const { theme } = useTheme();
+  
   return (
     <NavigationContainer>
       <AuthProvider>
@@ -37,19 +41,29 @@ export default function App() {
             <Stack.Screen name="SignUp" component={SignUpScreen} />
             <Stack.Screen name="Home" component={HomeScreen} />
             <Stack.Screen name="EmailVerification" component={EmailVerificationScreen} />
-            <Stack.Screen name="UploadStatement" component={UploadStatementScreen} />
+            <Stack.Screen name="UploadStatement" component={UploadStatement} />
             <Stack.Screen name="Analysis" component={AnalysisScreen} />
-            <Stack.Screen name="SavingsSuggestions" component={SavingsSuggestionsScreen} />
+            <Stack.Screen name="AnalysisDetails" component={AnalysisDetails} />
+            <Stack.Screen name="SavingsSuggestions" component={SavingsSuggestions} />
             <Stack.Screen name="Profile" component={ProfileScreen} />
             <Stack.Screen name="History" component={HistoryScreen} />
-            <Stack.Screen name="AnalysisDetail" component={AnalysisDetailScreen} />
           </Stack.Navigator>
-          <StatusBar style="auto" />
+          <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
         </AuthNavigator>
       </AuthProvider>
     </NavigationContainer>
   );
-}
+};
+
+const App = () => {
+  return (
+    <ThemeProvider>
+      <AppContent />
+    </ThemeProvider>
+  );
+};
+
+export default App;
 
 const styles = StyleSheet.create({
   container: {

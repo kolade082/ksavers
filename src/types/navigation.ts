@@ -6,16 +6,12 @@ export type RootStackParamList = {
   Login: undefined;
   SignUp: undefined;
   Home: undefined;
-  UploadStatement: undefined;
-  Analysis: {
-    fileUri: string;
-  };
-  SavingsSuggestions: undefined;
   Profile: undefined;
+  Analysis: { fileUri: string };
+  AnalysisDetails: { id: string };
   History: undefined;
-  AnalysisDetail: {
-    analysisId: string;
-  };
+  SavingsSuggestions: undefined;
+  UploadStatement: undefined;
   EmailVerification: undefined;
 };
 

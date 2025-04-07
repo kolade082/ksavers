@@ -1,25 +1,52 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Switch } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Switch, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { NavigationProp } from '../types/navigation';
+import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 
 interface ProfileScreenProps {
   navigation: NavigationProp;
 }
 
-// Mock user data
-const mockUserData = {
-  name: 'Kolade Dara',
-  email: 'koladedara@outlook.com',
-  joinDate: 'January 2024',
+// Mock data for stats (we'll implement real data later)
+const mockStats = {
   totalAnalyses: 12,
   totalSavings: '£2,500',
 };
 
 const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
-  const [notificationsEnabled, setNotificationsEnabled] = React.useState(true);
-  const [darkMode, setDarkMode] = React.useState(false);
+  const { user, logout } = useAuth();
+  const { theme, colors, toggleTheme } = useTheme();
+  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+  const [loading, setLoading] = useState(false);
+
+  // Extract user information
+  const fullName = user?.displayName || 'User';
+  const [firstName, lastName] = fullName.split(' ');
+  const email = user?.email || '';
+  
+  // Format join date
+  const joinDate = user?.metadata?.creationTime 
+    ? new Date(user.metadata.creationTime).toLocaleDateString('en-US', { 
+        month: 'long', 
+        year: 'numeric' 
+      })
+    : 'Recently';
+
+  const handleLogout = async () => {
+    try {
+      setLoading(true);
+      await logout();
+      // Navigation will be handled by AuthNavigator
+    } catch (error) {
+      console.error('Logout error:', error);
+      Alert.alert('Error', 'Failed to log out. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const menuItems = [
     {
@@ -35,8 +62,8 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
         <Switch
           value={notificationsEnabled}
           onValueChange={setNotificationsEnabled}
-          trackColor={{ false: '#767577', true: '#81b0ff' }}
-          thumbColor={notificationsEnabled ? '#4CAF50' : '#f4f3f4'}
+          trackColor={{ false: '#767577', true: colors.primary }}
+          thumbColor={notificationsEnabled ? colors.success : colors.disabled}
         />
       ),
     },
@@ -46,10 +73,10 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
       onPress: () => {},
       rightComponent: (
         <Switch
-          value={darkMode}
-          onValueChange={setDarkMode}
-          trackColor={{ false: '#767577', true: '#81b0ff' }}
-          thumbColor={darkMode ? '#4CAF50' : '#f4f3f4'}
+          value={theme === 'dark'}
+          onValueChange={toggleTheme}
+          trackColor={{ false: '#767577', true: colors.primary }}
+          thumbColor={theme === 'dark' ? colors.success : colors.disabled}
         />
       ),
     },
@@ -71,65 +98,73 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   ];
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <View style={styles.header}>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
+      <View style={[styles.header, { backgroundColor: colors.card, borderBottomColor: colors.border }]}>
         <TouchableOpacity
           style={styles.backButton}
           onPress={() => navigation.goBack()}
         >
-          <MaterialIcons name="arrow-back" size={24} color="#333" />
+          <MaterialIcons name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
-        <Text style={styles.headerText}>Profile</Text>
+        <Text style={[styles.headerText, { color: colors.text }]}>Profile</Text>
       </View>
 
       <ScrollView style={styles.container}>
         {/* Profile Header */}
-        <View style={styles.profileHeader}>
-          <View style={styles.avatarContainer}>
-            <MaterialIcons name="account-circle" size={80} color="#4CAF50" />
+        <View style={[styles.profileHeader, { backgroundColor: colors.card }]}>
+          <View style={[styles.avatarContainer, { backgroundColor: colors.background }]}>
+            <MaterialIcons name="account-circle" size={80} color={colors.primary} />
           </View>
-          <Text style={styles.userName}>{mockUserData.name}</Text>
-          <Text style={styles.userEmail}>{mockUserData.email}</Text>
-          <Text style={styles.joinDate}>Member since {mockUserData.joinDate}</Text>
+          <Text style={[styles.userName, { color: colors.text }]}>{fullName}</Text>
+          <Text style={[styles.userEmail, { color: colors.text }]}>{email}</Text>
+          <Text style={[styles.joinDate, { color: colors.placeholder }]}>Member since {joinDate}</Text>
         </View>
 
         {/* Stats Cards */}
-        <View style={styles.statsContainer}>
-          <View style={styles.statCard}>
-            <MaterialIcons name="analytics" size={24} color="#4CAF50" />
-            <Text style={styles.statValue}>{mockUserData.totalAnalyses}</Text>
-            <Text style={styles.statLabel}>Analyses</Text>
+        <View style={[styles.statsContainer, { backgroundColor: colors.card }]}>
+          <View style={[styles.statCard, { backgroundColor: colors.background }]}>
+            <MaterialIcons name="analytics" size={24} color={colors.primary} />
+            <Text style={[styles.statValue, { color: colors.text }]}>{mockStats.totalAnalyses}</Text>
+            <Text style={[styles.statLabel, { color: colors.placeholder }]}>Analyses</Text>
           </View>
-          <View style={styles.statCard}>
-            <MaterialIcons name="savings" size={24} color="#2196F3" />
-            <Text style={styles.statValue}>{mockUserData.totalSavings}</Text>
-            <Text style={styles.statLabel}>Total Savings</Text>
+          <View style={[styles.statCard, { backgroundColor: colors.background }]}>
+            <MaterialIcons name="savings" size={24} color={colors.secondary} />
+            <Text style={[styles.statValue, { color: colors.text }]}>{mockStats.totalSavings}</Text>
+            <Text style={[styles.statLabel, { color: colors.placeholder }]}>Total Savings</Text>
           </View>
         </View>
 
         {/* Menu Items */}
-        <View style={styles.menuContainer}>
+        <View style={[styles.menuContainer, { backgroundColor: colors.card }]}>
           {menuItems.map((item, index) => (
             <TouchableOpacity
               key={index}
-              style={styles.menuItem}
+              style={[styles.menuItem, { borderBottomColor: colors.border }]}
               onPress={item.onPress}
             >
               <View style={styles.menuItemLeft}>
-                <MaterialIcons name={item.icon as any} size={24} color="#666" />
-                <Text style={styles.menuItemText}>{item.title}</Text>
+                <MaterialIcons name={item.icon as any} size={24} color={colors.text} />
+                <Text style={[styles.menuItemText, { color: colors.text }]}>{item.title}</Text>
               </View>
               {item.rightComponent || (
-                <MaterialIcons name="chevron-right" size={24} color="#666" />
+                <MaterialIcons name="chevron-right" size={24} color={colors.text} />
               )}
             </TouchableOpacity>
           ))}
         </View>
 
         {/* Logout Button */}
-        <TouchableOpacity style={styles.logoutButton}>
-          <MaterialIcons name="logout" size={24} color="#FF6B6B" />
-          <Text style={styles.logoutText}>Log Out</Text>
+        <TouchableOpacity 
+          style={[
+            styles.logoutButton, 
+            { backgroundColor: colors.card, borderColor: colors.error },
+            loading && styles.buttonDisabled
+          ]}
+          onPress={handleLogout}
+          disabled={loading}
+        >
+          <MaterialIcons name="logout" size={24} color={colors.error} />
+          <Text style={[styles.logoutText, { color: colors.error }]}>Log Out</Text>
         </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
@@ -139,7 +174,6 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
   },
   container: {
     flex: 1,
@@ -148,9 +182,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     padding: 16,
-    backgroundColor: '#fff',
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
   },
   backButton: {
     padding: 8,
@@ -159,18 +191,15 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     marginLeft: 16,
-    color: '#333',
   },
   profileHeader: {
     alignItems: 'center',
     padding: 20,
-    backgroundColor: '#fff',
   },
   avatarContainer: {
     width: 100,
     height: 100,
     borderRadius: 50,
-    backgroundColor: '#f8f9fa',
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 16,
@@ -178,46 +207,38 @@ const styles = StyleSheet.create({
   userName: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#333',
     marginBottom: 4,
   },
   userEmail: {
     fontSize: 16,
-    color: '#666',
     marginBottom: 4,
   },
   joinDate: {
     fontSize: 14,
-    color: '#999',
   },
   statsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     padding: 20,
-    backgroundColor: '#fff',
     marginTop: 1,
   },
   statCard: {
     flex: 1,
     alignItems: 'center',
     padding: 16,
-    backgroundColor: '#f8f9fa',
     borderRadius: 12,
     marginHorizontal: 4,
   },
   statValue: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#333',
     marginTop: 8,
   },
   statLabel: {
     fontSize: 14,
-    color: '#666',
     marginTop: 4,
   },
   menuContainer: {
-    backgroundColor: '#fff',
     marginTop: 20,
   },
   menuItem: {
@@ -226,7 +247,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
   },
   menuItemLeft: {
     flexDirection: 'row',
@@ -234,7 +254,6 @@ const styles = StyleSheet.create({
   },
   menuItemText: {
     fontSize: 16,
-    color: '#333',
     marginLeft: 16,
   },
   logoutButton: {
@@ -243,16 +262,16 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     padding: 16,
     margin: 20,
-    backgroundColor: '#fff',
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#FF6B6B',
+  },
+  buttonDisabled: {
+    opacity: 0.7,
   },
   logoutText: {
     fontSize: 16,
-    color: '#FF6B6B',
-    marginLeft: 8,
     fontWeight: '600',
+    marginLeft: 8,
   },
 });
 

@@ -1,286 +1,123 @@
-import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  SafeAreaView,
-  Animated,
-} from 'react-native';
+import React from 'react';
+import { View, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
+import { useTheme } from '../context/ThemeContext';
+import ThemedView from '../components/ThemedView';
+import ThemedText from '../components/ThemedText';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../types/navigation';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
 
-type HistoryScreenProps = NativeStackScreenProps<RootStackParamList, 'History'>;
+type HistoryScreenProps = {
+  navigation: NativeStackNavigationProp<RootStackParamList, 'History'>;
+};
 
-// Mock data for past analyses
-const mockAnalyses = [
+// Mock data for demonstration
+const mockHistory = [
   {
     id: '1',
     date: '2024-03-15',
-    time: '14:30',
-    fileName: 'Statement_March_2024.pdf',
-    totalSpending: 2500,
-    totalIncome: 3500,
-    savings: 1000,
-    topCategories: ['Food', 'Transport', 'Entertainment'],
+    type: 'analysis',
+    title: 'March Statement Analysis',
+    amount: '£2,500',
+    savings: '£500',
   },
   {
     id: '2',
-    date: '2024-02-28',
-    time: '16:45',
-    fileName: 'Statement_February_2024.pdf',
-    totalSpending: 2300,
-    totalIncome: 3500,
-    savings: 1200,
-    topCategories: ['Shopping', 'Food', 'Bills'],
+    date: '2024-02-15',
+    type: 'analysis',
+    title: 'February Statement Analysis',
+    amount: '£2,300',
+    savings: '£450',
   },
   {
     id: '3',
-    date: '2024-01-31',
-    time: '09:15',
-    fileName: 'Statement_January_2024.pdf',
-    totalSpending: 2800,
-    totalIncome: 3500,
-    savings: 700,
-    topCategories: ['Bills', 'Food', 'Transport'],
+    date: '2024-01-15',
+    type: 'analysis',
+    title: 'January Statement Analysis',
+    amount: '£2,400',
+    savings: '£480',
   },
 ];
 
-type SortOption = 'date' | 'savings' | 'spending';
-type FilterOption = 'all' | 'high-savings' | 'low-savings';
-
 const HistoryScreen: React.FC<HistoryScreenProps> = ({ navigation }) => {
-  const [sortBy, setSortBy] = useState<SortOption>('date');
-  const [filterBy, setFilterBy] = useState<FilterOption>('all');
-  const [showFilters, setShowFilters] = useState(false);
-  const filterAnimation = new Animated.Value(0);
-  const cardAnimations = mockAnalyses.map(() => new Animated.Value(0));
-
-//   console.log('HistoryScreen rendered');
-//   console.log('Mock analyses:', mockAnalyses);
-
-  // Start card animations when component mounts
-  React.useEffect(() => {
-    cardAnimations.forEach((animation, index) => {
-      Animated.timing(animation, {
-        toValue: 1,
-        duration: 300,
-        delay: index * 100,
-        useNativeDriver: true,
-      }).start();
-    });
-  }, []);
+  const { colors } = useTheme();
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      month: 'short',
+    return date.toLocaleDateString('en-GB', {
       day: 'numeric',
+      month: 'short',
       year: 'numeric',
     });
   };
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-    }).format(amount);
-  };
-
-  const toggleFilters = () => {
-    setShowFilters(!showFilters);
-    Animated.timing(filterAnimation, {
-      toValue: showFilters ? 0 : 1,
-      duration: 300,
-      useNativeDriver: false,
-    }).start();
-  };
-
-  const sortAnalyses = (analyses: typeof mockAnalyses) => {
-    return [...analyses].sort((a, b) => {
-      switch (sortBy) {
-        case 'date':
-          return new Date(b.date).getTime() - new Date(a.date).getTime();
-        case 'savings':
-          return b.savings - a.savings;
-        case 'spending':
-          return b.totalSpending - a.totalSpending;
-        default:
-          return 0;
-      }
-    });
-  };
-
-  const filterAnalyses = (analyses: typeof mockAnalyses) => {
-    switch (filterBy) {
-      case 'high-savings':
-        return analyses.filter(analysis => analysis.savings > 1000);
-      case 'low-savings':
-        return analyses.filter(analysis => analysis.savings <= 1000);
-      default:
-        return analyses;
-    }
-  };
-
-  const filteredAndSortedAnalyses = filterAnalyses(sortAnalyses(mockAnalyses));
-
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => navigation.goBack()}
-        >
-          <MaterialIcons name="arrow-back" size={24} color="#333" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Analysis History</Text>
-        <TouchableOpacity
-          style={styles.filterButton}
-          onPress={toggleFilters}
-        >
-          <MaterialIcons name="filter-list" size={24} color="#333" />
-        </TouchableOpacity>
-      </View>
-
-      <Animated.View
-        style={[
-          styles.filterContainer,
-          {
-            maxHeight: filterAnimation.interpolate({
-              inputRange: [0, 1],
-              outputRange: [0, 120],
-            }),
-            opacity: filterAnimation,
-          },
-        ]}
-      >
-        <View style={styles.filterSection}>
-          <Text style={styles.filterTitle}>Sort By</Text>
-          <View style={styles.filterOptions}>
-            <TouchableOpacity
-              style={[styles.filterOption, sortBy === 'date' && styles.filterOptionActive]}
-              onPress={() => setSortBy('date')}
-            >
-              <Text style={[styles.filterOptionText, sortBy === 'date' && styles.filterOptionTextActive]}>
-                Date
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.filterOption, sortBy === 'savings' && styles.filterOptionActive]}
-              onPress={() => setSortBy('savings')}
-            >
-              <Text style={[styles.filterOptionText, sortBy === 'savings' && styles.filterOptionTextActive]}>
-                Savings
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.filterOption, sortBy === 'spending' && styles.filterOptionActive]}
-              onPress={() => setSortBy('spending')}
-            >
-              <Text style={[styles.filterOptionText, sortBy === 'spending' && styles.filterOptionTextActive]}>
-                Spending
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        <View style={styles.filterSection}>
-          <Text style={styles.filterTitle}>Filter By</Text>
-          <View style={styles.filterOptions}>
-            <TouchableOpacity
-              style={[styles.filterOption, filterBy === 'all' && styles.filterOptionActive]}
-              onPress={() => setFilterBy('all')}
-            >
-              <Text style={[styles.filterOptionText, filterBy === 'all' && styles.filterOptionTextActive]}>
-                All
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.filterOption, filterBy === 'high-savings' && styles.filterOptionActive]}
-              onPress={() => setFilterBy('high-savings')}
-            >
-              <Text style={[styles.filterOptionText, filterBy === 'high-savings' && styles.filterOptionTextActive]}>
-                High Savings
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.filterOption, filterBy === 'low-savings' && styles.filterOptionActive]}
-              onPress={() => setFilterBy('low-savings')}
-            >
-              <Text style={[styles.filterOptionText, filterBy === 'low-savings' && styles.filterOptionTextActive]}>
-                Low Savings
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Animated.View>
-
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
       <ScrollView style={styles.container}>
-        {filteredAndSortedAnalyses.map((analysis, index) => (
-          <Animated.View
-            key={analysis.id}
-            style={[
-              styles.analysisCard,
-              {
-                transform: [{
-                  translateY: cardAnimations[index].interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [50, 0],
-                  }),
-                }],
-                opacity: cardAnimations[index],
-              },
-            ]}
-          >
+        {/* Header */}
+        <ThemedView useCard style={styles.header}>
+          <View>
+            <ThemedText variant="title">Analysis History</ThemedText>
+            <ThemedText variant="caption">View your past statement analyses</ThemedText>
+          </View>
+        </ThemedView>
+
+        {/* History List */}
+        <ThemedView useCard style={styles.historyList}>
+          {mockHistory.map((item) => (
             <TouchableOpacity
-              onPress={() => navigation.navigate('AnalysisDetail', { analysisId: analysis.id })}
+              key={item.id}
+              style={[styles.historyItem, { borderBottomColor: colors.border }]}
+              onPress={() => navigation.navigate('Analysis', { fileUri: `mock-uri-${item.id}` })}
             >
-              <View style={styles.cardHeader}>
-                <View>
-                  <Text style={styles.fileName}>{analysis.fileName}</Text>
-                  <Text style={styles.dateTime}>
-                    {formatDate(analysis.date)} at {analysis.time}
-                  </Text>
+              <View style={styles.historyItemHeader}>
+                <View style={styles.historyItemTitle}>
+                  <MaterialIcons name="analytics" size={24} color={colors.primary} />
+                  <ThemedText variant="body" style={{ marginLeft: 12 }}>
+                    {item.title}
+                  </ThemedText>
                 </View>
-                <MaterialIcons name="chevron-right" size={24} color="#666" />
+                <MaterialIcons name="chevron-right" size={24} color={colors.text} />
               </View>
-
-              <View style={styles.summaryContainer}>
-                <View style={styles.summaryItem}>
-                  <Text style={styles.summaryLabel}>Spending</Text>
-                  <Text style={styles.summaryValue}>
-                    {formatCurrency(analysis.totalSpending)}
-                  </Text>
+              
+              <View style={styles.historyItemDetails}>
+                <View style={styles.historyItemDetail}>
+                  <ThemedText variant="caption">Date</ThemedText>
+                  <ThemedText>{formatDate(item.date)}</ThemedText>
                 </View>
-                <View style={styles.summaryItem}>
-                  <Text style={styles.summaryLabel}>Income</Text>
-                  <Text style={styles.summaryValue}>
-                    {formatCurrency(analysis.totalIncome)}
-                  </Text>
+                <View style={styles.historyItemDetail}>
+                  <ThemedText variant="caption">Total Spent</ThemedText>
+                  <ThemedText>{item.amount}</ThemedText>
                 </View>
-                <View style={styles.summaryItem}>
-                  <Text style={styles.summaryLabel}>Savings</Text>
-                  <Text style={[styles.summaryValue, styles.savingsValue]}>
-                    {formatCurrency(analysis.savings)}
-                  </Text>
-                </View>
-              </View>
-
-              <View style={styles.categoriesContainer}>
-                <Text style={styles.categoriesLabel}>Top Categories:</Text>
-                <View style={styles.categoriesList}>
-                  {analysis.topCategories.map((category, index) => (
-                    <View key={index} style={styles.categoryTag}>
-                      <Text style={styles.categoryText}>{category}</Text>
-                    </View>
-                  ))}
+                <View style={styles.historyItemDetail}>
+                  <ThemedText variant="caption">Total Saved</ThemedText>
+                  <ThemedText style={{ color: colors.success }}>{item.savings}</ThemedText>
                 </View>
               </View>
             </TouchableOpacity>
-          </Animated.View>
-        ))}
+          ))}
+        </ThemedView>
+
+        {/* Empty State */}
+        {mockHistory.length === 0 && (
+          <ThemedView useCard style={styles.emptyState}>
+            <MaterialIcons name="history" size={48} color={colors.placeholder} />
+            <ThemedText variant="subtitle" style={{ marginTop: 16 }}>
+              No Analysis History
+            </ThemedText>
+            <ThemedText variant="caption" style={{ textAlign: 'center', marginTop: 8 }}>
+              Upload your first bank statement to see your analysis history here.
+            </ThemedText>
+            <TouchableOpacity
+              style={[styles.uploadButton, { backgroundColor: colors.primary }]}
+              onPress={() => navigation.navigate('UploadStatement')}
+            >
+              <MaterialIcons name="cloud-upload" size={24} color="#fff" />
+              <ThemedText style={styles.uploadButtonText}>Upload Statement</ThemedText>
+            </TouchableOpacity>
+          </ThemedView>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -289,144 +126,55 @@ const HistoryScreen: React.FC<HistoryScreenProps> = ({ navigation }) => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 16,
-    backgroundColor: '#fff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-  },
-  backButton: {
-    marginRight: 16,
-  },
-  headerTitle: {
-    flex: 1,
-    fontSize: 20,
-    fontWeight: '600',
-    color: '#333',
-  },
-  filterButton: {
-    padding: 4,
-  },
-  filterContainer: {
-    backgroundColor: '#fff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-    overflow: 'hidden',
-  },
-  filterSection: {
-    padding: 12,
-  },
-  filterTitle: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#666',
-    marginBottom: 8,
-  },
-  filterOptions: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
-  filterOption: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
-    backgroundColor: '#f0f0f0',
-  },
-  filterOptionActive: {
-    backgroundColor: '#2196F3',
-  },
-  filterOptionText: {
-    fontSize: 14,
-    color: '#666',
-  },
-  filterOptionTextActive: {
-    color: '#fff',
   },
   container: {
     flex: 1,
-    padding: 16,
   },
-  analysisCard: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 3,
+  header: {
+    padding: 20,
   },
-  cardHeader: {
+  historyList: {
+    marginTop: 20,
+    padding: 20,
+  },
+  historyItem: {
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+  },
+  historyItemHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: 12,
   },
-  fileName: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 4,
+  historyItemTitle: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
-  dateTime: {
-    fontSize: 14,
-    color: '#666',
-  },
-  summaryContainer: {
+  historyItemDetails: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 16,
-    paddingBottom: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
   },
-  summaryItem: {
+  historyItemDetail: {
     flex: 1,
   },
-  summaryLabel: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 4,
+  emptyState: {
+    margin: 20,
+    padding: 20,
+    alignItems: 'center',
   },
-  summaryValue: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
-  },
-  savingsValue: {
-    color: '#4CAF50',
-  },
-  categoriesContainer: {
-    marginTop: 8,
-  },
-  categoriesLabel: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 8,
-  },
-  categoriesList: {
+  uploadButton: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 16,
+    borderRadius: 12,
+    marginTop: 20,
   },
-  categoryTag: {
-    backgroundColor: '#f0f0f0',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
-  },
-  categoryText: {
-    fontSize: 14,
-    color: '#666',
+  uploadButtonText: {
+    color: '#fff',
+    marginLeft: 8,
+    fontWeight: '600',
   },
 });
 
