@@ -3,6 +3,7 @@ import { StyleSheet } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { AuthProvider } from './src/context/AuthContext';
+import AuthNavigator from './src/navigation/AuthNavigator';
 import SplashScreen from './src/screens/SplashScreen';
 import OnboardingScreen from './src/screens/OnboardingScreen';
 import LoginScreen from './src/screens/LoginScreen';
@@ -14,35 +15,39 @@ import SavingsSuggestionsScreen from './src/screens/SavingsSuggestionsScreen';
 import ProfileScreen from './src/screens/ProfileScreen';
 import HistoryScreen from './src/screens/HistoryScreen';
 import AnalysisDetailScreen from './src/screens/AnalysisDetailScreen';
+import EmailVerificationScreen from './src/screens/EmailVerificationScreen';
 import { RootStackParamList } from './src/types/navigation';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function App() {
   return (
-    <AuthProvider>
-      <NavigationContainer>
-        <Stack.Navigator
-          initialRouteName="Splash"
-          screenOptions={{
-            headerShown: false,
-          }}
-        >
-          <Stack.Screen name="Splash" component={SplashScreen} />
-          <Stack.Screen name="Onboarding" component={OnboardingScreen} />
-          <Stack.Screen name="Login" component={LoginScreen} />
-          <Stack.Screen name="SignUp" component={SignUpScreen} />
-          <Stack.Screen name="Home" component={HomeScreen} />
-          <Stack.Screen name="UploadStatement" component={UploadStatementScreen} />
-          <Stack.Screen name="Analysis" component={AnalysisScreen} />
-          <Stack.Screen name="SavingsSuggestions" component={SavingsSuggestionsScreen} />
-          <Stack.Screen name="Profile" component={ProfileScreen} />
-          <Stack.Screen name="History" component={HistoryScreen} />
-          <Stack.Screen name="AnalysisDetail" component={AnalysisDetailScreen} />
-        </Stack.Navigator>
-        <StatusBar style="auto" />
-      </NavigationContainer>
-    </AuthProvider>
+    <NavigationContainer>
+      <AuthProvider>
+        <AuthNavigator>
+          <Stack.Navigator
+            initialRouteName="Splash"
+            screenOptions={{
+              headerShown: false,
+            }}
+          >
+            <Stack.Screen name="Splash" component={SplashScreen} />
+            <Stack.Screen name="Onboarding" component={OnboardingScreen} />
+            <Stack.Screen name="Login" component={LoginScreen} />
+            <Stack.Screen name="SignUp" component={SignUpScreen} />
+            <Stack.Screen name="Home" component={HomeScreen} />
+            <Stack.Screen name="EmailVerification" component={EmailVerificationScreen} />
+            <Stack.Screen name="UploadStatement" component={UploadStatementScreen} />
+            <Stack.Screen name="Analysis" component={AnalysisScreen} />
+            <Stack.Screen name="SavingsSuggestions" component={SavingsSuggestionsScreen} />
+            <Stack.Screen name="Profile" component={ProfileScreen} />
+            <Stack.Screen name="History" component={HistoryScreen} />
+            <Stack.Screen name="AnalysisDetail" component={AnalysisDetailScreen} />
+          </Stack.Navigator>
+          <StatusBar style="auto" />
+        </AuthNavigator>
+      </AuthProvider>
+    </NavigationContainer>
   );
 }
 
