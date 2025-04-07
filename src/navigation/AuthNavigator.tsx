@@ -15,20 +15,23 @@ const AuthNavigator: React.FC<AuthNavigatorProps> = ({ children }) => {
   useEffect(() => {
     if (!loading) {
       if (user) {
+        console.log('AuthNavigator: User is signed in, email verified:', isEmailVerified);
         // Check if email is verified
         if (isEmailVerified) {
+          console.log('AuthNavigator: Navigating to Home screen');
           navigation.reset({
             index: 0,
             routes: [{ name: 'Home' }],
           });
         } else {
-          // If not verified, go to email verification screen
+          console.log('AuthNavigator: Navigating to EmailVerification screen');
           navigation.reset({
             index: 0,
             routes: [{ name: 'EmailVerification' }],
           });
         }
       } else {
+        console.log('AuthNavigator: User is signed out, navigating to Login screen');
         navigation.reset({
           index: 0,
           routes: [{ name: 'Login' }],

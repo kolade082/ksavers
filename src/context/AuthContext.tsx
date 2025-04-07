@@ -75,8 +75,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signIn = async (email: string, password: string) => {
     try {
-      await signInWithEmailAndPassword(auth, email, password);
-    } catch (error) {
+      console.log('AuthContext: Attempting to sign in with email:', email);
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      console.log('AuthContext: Sign in successful, user ID:', userCredential.user.uid);
+      
+      // Check if email is verified
+      if (!userCredential.user.emailVerified) {
+        console.log('AuthContext: User email not verified');
+        // We'll let the AuthNavigator handle navigation based on email verification status
+      } else {
+        console.log('AuthContext: User email verified');
+      }
+    } catch (error: any) {
+      console.error('AuthContext: Sign in error:', error);
+      console.error('AuthContext: Error code:', error.code);
+      console.error('AuthContext: Error message:', error.message);
       throw error;
     }
   };

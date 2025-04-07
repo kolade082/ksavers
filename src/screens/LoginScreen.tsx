@@ -8,11 +8,13 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  Image,
+  Alert,
+  ActivityIndicator,
 } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../types/navigation';
 import { MaterialIcons } from '@expo/vector-icons';
+import { useAuth } from '../context/AuthContext';
 
 type LoginScreenProps = {
   navigation: NativeStackNavigationProp<RootStackParamList, 'Login'>;
@@ -22,10 +24,61 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const { signIn } = useAuth();
 
-  const handleLogin = () => {
-    // TODO: Implement actual login logic
-    navigation.replace('Home');
+  const validateForm = () => {
+    if (!email.trim()) {
+      Alert.alert('Error', 'Please enter your email');
+      return false;
+    }
+    if (!password.trim()) {
+      Alert.alert('Error', 'Please enter your password');
+      return false;
+    }
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      Alert.alert('Error', 'Please enter a valid email address');
+      return false;
+    }
+    return true;
+  };
+
+  const handleLogin = async () => {
+    if (!validateForm()) return;
+
+    try {
+      setLoading(true);
+      console.log('Attempting to sign in with email:', email);
+      await signIn(email, password);
+      console.log('Sign in successful');
+      // Navigation will be handled by AuthNavigator
+    } catch (error: any) {
+      console.error('Sign in error details:', error);
+      console.error('Error code:', error.code);
+      console.error('Error message:', error.message);
+      
+      let errorMessage = 'An error occurred during sign in';
+      if (error.code === 'auth/invalid-email') {
+        errorMessage = 'Please enter a valid email address';
+      } else if (error.code === 'auth/user-disabled') {
+        errorMessage = 'This account has been disabled';
+      } else if (error.code === 'auth/user-not-found') {
+        errorMessage = 'No account found with this email';
+      } else if (error.code === 'auth/wrong-password') {
+        errorMessage = 'Incorrect password';
+      } else if (error.code === 'auth/invalid-credential') {
+        errorMessage = 'Invalid email or password. Please check your credentials and try again.';
+      } else if (error.code === 'auth/too-many-requests') {
+        errorMessage = 'Too many attempts. Please try again later';
+      } else if (error.code === 'auth/network-request-failed') {
+        errorMessage = 'Network error. Please check your internet connection';
+      }
+      Alert.alert('Error', errorMessage);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -54,6 +107,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
               keyboardType="email-address"
               autoCapitalize="none"
               autoComplete="email"
+              editable={!loading}
             />
           </View>
 
@@ -65,10 +119,12 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
               value={password}
               onChangeText={setPassword}
               secureTextEntry={!showPassword}
+              editable={!loading}
             />
             <TouchableOpacity 
               onPress={() => setShowPassword(!showPassword)}
               style={styles.eyeIcon}
+              disabled={loading}
             >
               <MaterialIcons 
                 name={showPassword ? "visibility" : "visibility-off"} 
@@ -81,20 +137,29 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
           <TouchableOpacity 
             style={styles.forgotPassword}
             onPress={() => {/* TODO: Implement forgot password */}}
+            disabled={loading}
           >
             <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
           </TouchableOpacity>
 
           <TouchableOpacity 
-            style={styles.loginButton}
+            style={[styles.loginButton, loading && styles.buttonDisabled]}
             onPress={handleLogin}
+            disabled={loading}
           >
-            <Text style={styles.loginButtonText}>Sign In</Text>
+            {loading ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={styles.loginButtonText}>Sign In</Text>
+            )}
           </TouchableOpacity>
 
           <View style={styles.signUpContainer}>
             <Text style={styles.signUpText}>Don't have an account? </Text>
-            <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
+            <TouchableOpacity 
+              onPress={() => navigation.navigate('SignUp')}
+              disabled={loading}
+            >
               <Text style={styles.signUpLink}>Sign Up</Text>
             </TouchableOpacity>
           </View>
@@ -172,6 +237,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 24,
+  },
+  buttonDisabled: {
+    opacity: 0.7,
   },
   loginButtonText: {
     color: '#fff',
