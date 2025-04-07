@@ -1,16 +1,19 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { NavigationProp } from '../types/navigation';
+import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
+import ThemedView from '../components/ThemedView';
+import ThemedText from '../components/ThemedText';
 
 interface HomeScreenProps {
   navigation: NavigationProp;
 }
 
-// Mock data for demonstration
+// Mock data for demonstration (keeping other mock data for now)
 const mockData = {
-  userName: 'Kolade',
   totalSavings: '£2,500',
   monthlyBudget: '£3,000',
   lastAnalysis: '2 days ago',
@@ -22,6 +25,12 @@ const mockData = {
 };
 
 const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
+  const { user } = useAuth();
+  const { colors } = useTheme();
+  
+  // Extract first name from display name
+  const firstName = user?.displayName?.split(' ')[0] || 'User';
+  
   const getActivityIcon = (type: string) => {
     switch (type) {
       case 'analysis':
@@ -36,11 +45,11 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const getActivityColor = (type: string) => {
     switch (type) {
       case 'analysis':
-        return '#4CAF50';
+        return colors.success;
       case 'suggestion':
-        return '#FFC107';
+        return colors.warning;
       default:
-        return '#2196F3';
+        return colors.info;
     }
   };
 
@@ -50,70 +59,70 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
       <ScrollView style={styles.container}>
         {/* Welcome Section */}
-        <View style={styles.welcomeSection}>
+        <ThemedView useCard style={styles.welcomeSection}>
           <View>
-            <Text style={styles.welcomeText}>Welcome back,</Text>
-            <Text style={styles.userName}>{mockData.userName}</Text>
+            <ThemedText variant="caption">Welcome back,</ThemedText>
+            <ThemedText variant="title">{firstName}</ThemedText>
           </View>
           <View style={styles.headerButtons}>
             <TouchableOpacity 
               style={styles.headerButton}
               onPress={handleHistoryPress}
             >
-              <MaterialIcons name="history" size={24} color="#333" />
+              <MaterialIcons name="history" size={24} color={colors.text} />
             </TouchableOpacity>
             <TouchableOpacity 
               style={styles.headerButton}
               onPress={() => navigation.navigate('Profile')}
             >
-              <MaterialIcons name="account-circle" size={24} color="#333" />
+              <MaterialIcons name="account-circle" size={24} color={colors.text} />
             </TouchableOpacity>
           </View>
-        </View>
+        </ThemedView>
 
         {/* Quick Stats */}
-        <View style={styles.statsContainer}>
-          <View style={styles.statCard}>
-            <MaterialIcons name="savings" size={24} color="#4CAF50" />
-            <Text style={styles.statValue}>{mockData.totalSavings}</Text>
-            <Text style={styles.statLabel}>Total Savings</Text>
+        <ThemedView useCard style={styles.statsContainer}>
+          <View style={[styles.statCard, { backgroundColor: colors.background }]}>
+            <MaterialIcons name="savings" size={24} color={colors.success} />
+            <ThemedText variant="subtitle">{mockData.totalSavings}</ThemedText>
+            <ThemedText variant="caption">Total Savings</ThemedText>
           </View>
-          <View style={styles.statCard}>
-            <MaterialIcons name="account-balance-wallet" size={24} color="#2196F3" />
-            <Text style={styles.statValue}>{mockData.monthlyBudget}</Text>
-            <Text style={styles.statLabel}>Monthly Budget</Text>
+          <View style={[styles.statCard, { backgroundColor: colors.background }]}>
+            <MaterialIcons name="account-balance-wallet" size={24} color={colors.info} />
+            <ThemedText variant="subtitle">{mockData.monthlyBudget}</ThemedText>
+            <ThemedText variant="caption">Monthly Budget</ThemedText>
           </View>
-          <View style={styles.statCard}>
-            <MaterialIcons name="history" size={24} color="#FF9800" />
-            <Text style={styles.statValue}>{mockData.lastAnalysis}</Text>
-            <Text style={styles.statLabel}>Last Analysis</Text>
+          <View style={[styles.statCard, { backgroundColor: colors.background }]}>
+            <MaterialIcons name="history" size={24} color={colors.warning} />
+            <ThemedText variant="subtitle">{mockData.lastAnalysis}</ThemedText>
+            <ThemedText variant="caption">Last Analysis</ThemedText>
           </View>
-        </View>
+        </ThemedView>
 
         {/* Upload Button */}
         <TouchableOpacity
-          style={styles.uploadButton}
+          style={[styles.uploadButton, { backgroundColor: colors.primary }]}
           onPress={() => navigation.navigate('UploadStatement')}
         >
           <View style={styles.uploadContent}>
             <MaterialIcons name="cloud-upload" size={32} color="#fff" />
-            <Text style={styles.uploadText}>Upload Bank Statement</Text>
-            <Text style={styles.uploadSubtext}>
+            <ThemedText style={styles.uploadText}>Upload Bank Statement</ThemedText>
+            <ThemedText style={styles.uploadSubtext}>
               Get personalized insights and savings tips
-            </Text>
+            </ThemedText>
           </View>
         </TouchableOpacity>
 
         {/* Recent Activity */}
-        <View style={styles.activitySection}>
-          <Text style={styles.sectionTitle}>Recent Activity</Text>
+        <ThemedView useCard style={styles.activitySection}>
+          <ThemedText variant="subtitle">Recent Activity</ThemedText>
           {mockData.recentActivity.map((activity, index) => (
             <TouchableOpacity
               key={index}
-              style={styles.activityItem}
+              style={[styles.activityItem, { borderBottomColor: colors.border }]}
               onPress={() => {
                 if (activity.type === 'analysis') {
                   navigation.navigate('Analysis', { fileUri: 'mock-uri' });
@@ -126,17 +135,17 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                 <MaterialIcons name={getActivityIcon(activity.type)} size={24} color="#fff" />
               </View>
               <View style={styles.activityInfo}>
-                <Text style={styles.activityTitle}>
+                <ThemedText variant="body">
                   {activity.type === 'analysis' 
                     ? `Statement Analysis - ${activity.amount}`
                     : activity.title}
-                </Text>
-                <Text style={styles.activityDate}>{activity.date}</Text>
+                </ThemedText>
+                <ThemedText variant="caption">{activity.date}</ThemedText>
               </View>
-              <MaterialIcons name="chevron-right" size={24} color="#666" />
+              <MaterialIcons name="chevron-right" size={24} color={colors.text} />
             </TouchableOpacity>
           ))}
-        </View>
+        </ThemedView>
       </ScrollView>
     </SafeAreaView>
   );
@@ -145,7 +154,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
   },
   container: {
     flex: 1,
@@ -155,16 +163,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: 20,
-    backgroundColor: '#fff',
-  },
-  welcomeText: {
-    fontSize: 16,
-    color: '#666',
-  },
-  userName: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#333',
   },
   headerButtons: {
     flexDirection: 'row',
@@ -178,32 +176,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     padding: 20,
-    backgroundColor: '#fff',
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
   },
   statCard: {
     flex: 1,
     alignItems: 'center',
     padding: 12,
-    backgroundColor: '#f8f9fa',
     borderRadius: 12,
     marginHorizontal: 4,
   },
-  statValue: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
-    marginTop: 8,
-  },
-  statLabel: {
-    fontSize: 12,
-    color: '#666',
-    marginTop: 4,
-  },
   uploadButton: {
     margin: 20,
-    backgroundColor: '#4CAF50',
     borderRadius: 16,
     padding: 24,
     elevation: 4,
@@ -231,22 +214,14 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   activitySection: {
-    backgroundColor: '#fff',
     padding: 20,
     marginTop: 20,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 16,
   },
   activityItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 12,
+    padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
   },
   activityIcon: {
     width: 40,
@@ -254,19 +229,10 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 12,
   },
   activityInfo: {
     flex: 1,
-  },
-  activityTitle: {
-    fontSize: 16,
-    color: '#333',
-    marginBottom: 4,
-  },
-  activityDate: {
-    fontSize: 14,
-    color: '#666',
+    marginLeft: 16,
   },
 });
 
