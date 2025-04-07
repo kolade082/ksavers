@@ -16,6 +16,7 @@ export type RootStackParamList = {
   AnalysisDetail: {
     analysisId: string;
   };
+  EmailVerification: undefined;
 };
 
 export type NavigationProp = NativeStackNavigationProp<RootStackParamList>;

@@ -23,7 +23,8 @@ type SignUpScreenProps = {
 
 const SignUpScreen: React.FC<SignUpScreenProps> = ({ navigation }) => {
   const { signUp } = useAuth();
-  const [fullName, setFullName] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -32,8 +33,12 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ navigation }) => {
   const [loading, setLoading] = useState(false);
 
   const validateForm = () => {
-    if (!fullName.trim()) {
-      Alert.alert('Error', 'Please enter your full name');
+    if (!firstName.trim()) {
+      Alert.alert('Error', 'Please enter your first name');
+      return false;
+    }
+    if (!lastName.trim()) {
+      Alert.alert('Error', 'Please enter your last name');
       return false;
     }
     if (!email.trim()) {
@@ -61,9 +66,15 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ navigation }) => {
     try {
       setLoading(true);
       console.log('Attempting to sign up with email:', email);
-      const userCredential = await signUp(email, password);
+      const userCredential = await signUp(email, password, firstName, lastName);
       console.log('Sign up successful, user ID:', userCredential.user.uid);
-      // Navigation will be handled by the auth state change in AuthContext
+      
+      // Navigate to Email Verification screen after successful sign-up
+      // The AuthNavigator will handle this, but we'll do it explicitly here too
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'EmailVerification' }],
+      });
     } catch (error: any) {
       console.error('Sign up error details:', error);
       console.error('Error code:', error.code);
@@ -107,11 +118,23 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ navigation }) => {
             <MaterialIcons name="person" size={24} color="#666" style={styles.inputIcon} />
             <TextInput
               style={styles.input}
-              placeholder="Full Name"
-              value={fullName}
-              onChangeText={setFullName}
+              placeholder="First Name"
+              value={firstName}
+              onChangeText={setFirstName}
               autoCapitalize="words"
-              autoComplete="name"
+              autoComplete="name-given"
+            />
+          </View>
+
+          <View style={styles.inputContainer}>
+            <MaterialIcons name="person" size={24} color="#666" style={styles.inputIcon} />
+            <TextInput
+              style={styles.input}
+              placeholder="Last Name"
+              value={lastName}
+              onChangeText={setLastName}
+              autoCapitalize="words"
+              autoComplete="name-family"
             />
           </View>
 
