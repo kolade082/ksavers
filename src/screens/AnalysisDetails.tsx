@@ -146,10 +146,23 @@ const AnalysisDetails: React.FC<AnalysisDetailsProps> = ({ navigation }) => {
   const handleViewSavingsTips = () => {
     console.log('Attempting to navigate to SavingsSuggestions');
     try {
-      navigation.navigate('SavingsSuggestions');
+      // Reset the navigation stack to prevent going back to analysis
+      navigation.reset({
+        index: 0,
+        routes: [
+          { name: 'Home' },
+          { name: 'SavingsSuggestions' }
+        ],
+      });
       console.log('Navigation successful');
     } catch (error) {
       console.error('Navigation error:', error);
+      // Fallback navigation attempt
+      try {
+        navigation.navigate('SavingsSuggestions');
+      } catch (fallbackError) {
+        console.error('Fallback navigation failed:', fallbackError);
+      }
     }
   };
 
