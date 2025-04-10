@@ -5,6 +5,9 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { useTheme } from '../context/ThemeContext';
 import ThemedView from '../components/ThemedView';
 import ThemedText from '../components/ThemedText';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../types/navigation';
 
 // Mock data for demonstration
 const mockAnalysis = {
@@ -37,9 +40,13 @@ const mockAnalysis = {
   ],
 };
 
+// Add this type
+type AnalysisScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Analysis'>;
+
 const AnalysisScreen = () => {
   const [loading, setLoading] = useState(false);
   const { colors } = useTheme();
+  const navigation = useNavigation<AnalysisScreenNavigationProp>();
 
   const getInsightIcon = (type: string) => {
     switch (type) {
@@ -156,7 +163,10 @@ const AnalysisScreen = () => {
           </TouchableOpacity>
           <TouchableOpacity 
             style={[styles.actionButton, { backgroundColor: colors.success }]}
-            onPress={() => {/* TODO: Navigate to savings suggestions */}}
+            onPress={() => {
+              console.log('Navigating to SavingsSuggestions from AnalysisScreen...');
+              navigation.navigate('SavingsSuggestions');
+            }}
           >
             <MaterialIcons name="lightbulb" size={24} color="#fff" />
             <ThemedText style={styles.actionButtonText}>View Savings Tips</ThemedText>
