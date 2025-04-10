@@ -144,25 +144,12 @@ const AnalysisDetails: React.FC<AnalysisDetailsProps> = ({ navigation }) => {
   };
 
   const handleViewSavingsTips = () => {
-    console.log('Attempting to navigate to SavingsSuggestions');
+    console.log('Button pressed - handleViewSavingsTips called');
     try {
-      // Reset the navigation stack to prevent going back to analysis
-      navigation.reset({
-        index: 0,
-        routes: [
-          { name: 'Home' },
-          { name: 'SavingsSuggestions' }
-        ],
-      });
-      console.log('Navigation successful');
+      console.log('Navigating to SavingsSuggestions from AnalysisDetails...');
+      navigation.navigate('SavingsSuggestions');
     } catch (error) {
-      console.error('Navigation error:', error);
-      // Fallback navigation attempt
-      try {
-        navigation.navigate('SavingsSuggestions');
-      } catch (fallbackError) {
-        console.error('Fallback navigation failed:', fallbackError);
-      }
+      console.error('Error navigating to SavingsSuggestions:', error);
     }
   };
 
@@ -262,15 +249,11 @@ const AnalysisDetails: React.FC<AnalysisDetailsProps> = ({ navigation }) => {
         {/* Action Buttons */}
         <View style={styles.actionButtons}>
           <TouchableOpacity 
-            style={[styles.actionButton, { backgroundColor: colors.primary }]}
-            onPress={() => {/* TODO: Implement save PDF */}}
-          >
-            <MaterialIcons name="picture-as-pdf" size={24} color="#fff" />
-            <ThemedText style={styles.actionButtonText}>Save as PDF</ThemedText>
-          </TouchableOpacity>
-          <TouchableOpacity 
             style={[styles.actionButton, { backgroundColor: colors.success }]}
-            onPress={handleViewSavingsTips}
+            onPress={() => {
+              console.log('Direct button press detected');
+              handleViewSavingsTips();
+            }}
           >
             <MaterialIcons name="lightbulb" size={24} color="#fff" />
             <ThemedText style={styles.actionButtonText}>View Savings Tips</ThemedText>
@@ -362,6 +345,9 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 12,
     marginHorizontal: 4,
+    zIndex: 999,
+    elevation: 5,
+    minHeight: 50,
   },
   actionButtonText: {
     color: '#fff',
