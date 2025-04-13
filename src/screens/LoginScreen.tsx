@@ -191,6 +191,7 @@ const styles = StyleSheet.create({
     fontSize: 48,
     fontWeight: 'bold',
     marginBottom: 20,
+    color: '#007AFF',
   },
   form: {
     width: '100%',
