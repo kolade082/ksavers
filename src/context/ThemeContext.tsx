@@ -23,10 +23,10 @@ export interface ThemeColors {
 
 // Define light theme colors
 const lightColors: ThemeColors = {
-  primary: '#4CAF50',
+  primary: '#007AFF',
   secondary: '#2196F3',
-  background: '#f5f5f5',
-  card: '#ffffff',
+  background: '#ffffff',
+  card: '#f5f5f5',
   text: '#333333',
   border: '#eeeeee',
   notification: '#FF6B6B',

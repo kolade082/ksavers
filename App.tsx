@@ -12,7 +12,6 @@ import SignUpScreen from './src/screens/SignUpScreen';
 import HomeScreen from './src/screens/HomeScreen';
 import UploadStatement from './src/screens/UploadStatement';
 import AnalysisScreen from './src/screens/AnalysisScreen';
-import AnalysisDetails from './src/screens/AnalysisDetails';
 import SavingsSuggestions from './src/screens/SavingsSuggestions';
 import ProfileScreen from './src/screens/ProfileScreen';
 import HistoryScreen from './src/screens/HistoryScreen';
@@ -43,7 +42,6 @@ const AppContent = () => {
             <Stack.Screen name="EmailVerification" component={EmailVerificationScreen} />
             <Stack.Screen name="UploadStatement" component={UploadStatement} />
             <Stack.Screen name="Analysis" component={AnalysisScreen} />
-            <Stack.Screen name="AnalysisDetails" component={AnalysisDetails} />
             <Stack.Screen name="SavingsSuggestions" component={SavingsSuggestions} />
             <Stack.Screen name="Profile" component={ProfileScreen} />
             <Stack.Screen name="History" component={HistoryScreen} />
